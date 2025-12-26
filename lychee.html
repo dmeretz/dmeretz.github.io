@@ -56,86 +56,156 @@
     <li><a href="https://es.wikipedia.org/wiki/Annona_reticulata" target="_blank"><em>Annona reticulata</em></a> — atemoya</li>
   </ul>
 
-  <h2>Tabla de distancias taxonómicas</h2>
+ <h2>Tabla de distancias taxonómicas</h2>
+<p>
+Esta tabla compara cuán cercanas están estas especies evolutivamente usando pasos en la clasificación.
+Las celdas en rosa señalan frutas dentro de Sapindaceae consideradas “similares al lichi”.
+</p>
 
-  <p>
-    Esta tabla compara cuán cercanas están estas especies evolutivamente usando pasos en la clasificación.
-    Las celdas en rosa señalan frutas dentro de Sapindaceae consideradas “similares al lichi”.
-  </p>
+<table id="distance-table" border="1" style="border-collapse: collapse;">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Lichi</th>
+      <th>Rambután</th>
+      <th>Mamoncillo</th>
+      <th>Longan</th>
+      <th>Pulasan</th>
+      <th>Ackee</th>
+      <th>Guaraná</th>
+      <th>Soapberries</th>
+      <th>Arce</th>
+      <th>Castaño de indias</th>
+      <th>Mangostán</th>
+      <th>Tamarindo malabar</th>
+      <th>Guanábana</th>
+      <th>Chirimoya</th>
+      <th>Atemoya</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
 
-  <table id="distance-table"><!-- ... sin cambios aquí ... --></table>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const taxa = {
+    "Lichi": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Litchi", species:"chinensis", lycheeLike:true },
+    "Rambután": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Nephelium", species:"lappaceum", lycheeLike:true },
+    "Mamoncillo": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Melicoccus", species:"bijugatus", lycheeLike:true },
+    "Longan": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Dimocarpus", species:"longan", lycheeLike:true },
+    "Pulasan": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Nephelium", species:"mutabile", lycheeLike:true },
+    "Ackee": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Blighia", species:"sapida", lycheeLike:true },
+    "Guaraná": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Paullinia", species:"cupana", lycheeLike:true },
+    "Soapberries": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Sapindus", species:"spp", lycheeLike:true },
+    "Arce": { order:"Sapindales", family:"Sapindaceae", subfamily:"Hippocastanoideae", genus:"Acer", species:"spp", lycheeLike:false },
+    "Castaño de indias": { order:"Sapindales", family:"Sapindaceae", subfamily:"Hippocastanoideae", genus:"Aesculus", species:"spp", lycheeLike:false },
+    "Mangostán": { order:"Malpighiales", family:"Clusiaceae", subfamily:"", genus:"Garcinia", species:"mangostana", lycheeLike:false },
+    "Tamarindo malabar": { order:"Malpighiales", family:"Clusiaceae", subfamily:"", genus:"Garcinia", species:"gummi-gutta", lycheeLike:false },
+    "Guanábana": { order:"Magnoliales", family:"Annonaceae", subfamily:"", genus:"Annona", species:"muricata", lycheeLike:false },
+    "Chirimoya": { order:"Magnoliales", family:"Annonaceae", subfamily:"", genus:"Annona", species:"squamosa", lycheeLike:false },
+    "Atemoya": { order:"Magnoliales", family:"Annonaceae", subfamily:"", genus:"Annona", species:"reticulata", lycheeLike:false }
+  };
+  
+  const levels = ["order","family","subfamily","genus","species"];
+  const tbody = document.querySelector("#distance-table tbody");
+  const names = Object.keys(taxa);
 
-  <h2>Árbol taxonómico interactivo</h2>
+  names.forEach(row => {
+    const tr = document.createElement("tr");
+    const th = document.createElement("th");
+    th.textContent = row;
+    tr.appendChild(th);
 
-  <p>
-    Haz clic en cada grupo para expandir o contraer su contenido.
-  </p>
-
-  <ul class="tree">
-    <li>
-      <span class="toggle">Sapindales</span>
-      <ul class="nested">
-        <li>
-          <span class="toggle">Sapindaceae</span>
-          <ul class="nested">
-            <li>
-              <span class="toggle">Sapindoideae</span>
-              <ul class="nested">
-                <li>Lichi</li>
-                <li>Longan</li>
-                <li>Rambután</li>
-                <li>Pulasan</li>
-                <li>Mamoncillo</li>
-                <li>Guaraná</li>
-                <li>Korlan</li>
-                <li>Soapberries</li>
-              </ul>
-            </li>
-            <li>
-              <span class="toggle">Hippocastanoideae</span>
-              <ul class="nested">
-                <li>Arce</li>
-                <li>Castaño de indias</li>
-              </ul>
-            </li>
-          </ul>
-        </li>
-      </ul>
-    </li>
-    <li>
-      <span class="toggle">Malpighiales</span>
-      <ul class="nested">
-        <li>
-          <span class="toggle">Clusiaceae</span>
-          <ul class="nested">
-            <li>Mangostán</li>
-            <li>Tamarindo malabar</li>
-          </ul>
-        </li>
-      </ul>
-    </li>
-    <li>
-      <span class="toggle">Magnoliales</span>
-      <ul class="nested">
-        <li>
-          <span class="toggle">Annonaceae</span>
-          <ul class="nested">
-            <li>Guanábana</li>
-            <li>Chirimoya</li>
-            <li>Atemoya</li>
-          </ul>
-        </li>
-      </ul>
-    </li>
-  </ul>
-
-  <script>
-    document.querySelectorAll('.tree .toggle').forEach(item => {
-      item.onclick = () => {
-        const next = item.nextElementSibling;
-        if (next) next.classList.toggle('active');
-      };
+    names.forEach(col => {
+      const td = document.createElement("td");
+      let d = 0;
+      for(let i=levels.length-1;i>=0;i--){
+        if(taxa[row][levels[i]] && taxa[row][levels[i]] === taxa[col][levels[i]]){
+          d = 2*(levels.length-1-i);
+          break;
+        }
+        d = 2*levels.length;
+      }
+      td.textContent = d;
+      if(taxa[row].lycheeLike && taxa[col].lycheeLike) td.style.backgroundColor="#fde0dc";
+      td.title = `Común hasta: ${levels[levels.length - d/2 - 1] || "ninguno"}`;
+      tr.appendChild(td);
     });
-  </script>
+
+    tbody.appendChild(tr);
+  });
+});
+</script>
+
+<h2>Árbol taxonómico interactivo</h2>
+<div id="tree"></div>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+const treeData = {
+  name: "Root",
+  children: [
+    { name: "Sapindales",
+      children: [
+        { name: "Sapindaceae",
+          children: [
+            { name: "Sapindoideae", children:[
+              { name:"Lichi"},{ name:"Rambután"},{ name:"Mamoncillo"},
+              { name:"Longan"},{ name:"Pulasan"},{ name:"Ackee"},
+              { name:"Guaraná"},{ name:"Korlan"},{ name:"Soapberries"}
+            ]},
+            { name:"Hippocastanoideae", children:[
+              { name:"Arce"},{ name:"Castaño de indias"}
+            ]}
+          ]
+        }
+      ]
+    },
+    { name: "Malpighiales", children:[
+      { name:"Clusiaceae", children:[{name:"Mangostán"},{name:"Tamarindo malabar"}]}
+    ]},
+    { name: "Magnoliales", children:[
+      { name:"Annonaceae", children:[{name:"Guanábana"},{name:"Chirimoya"},{name:"Atemoya"}]}
+    ]}
+  ]
+};
+
+const width = 800, height = 500;
+const svg = d3.select("#tree").append("svg")
+  .attr("width", width)
+  .attr("height", height)
+  .append("g").attr("transform","translate(40,0)");
+
+const root = d3.hierarchy(treeData);
+const treeLayout = d3.tree().size([height, width-160]);
+treeLayout(root);
+
+svg.selectAll('lines')
+  .data(root.links())
+  .enter()
+  .append('line')
+  .attr('x1', d=>d.source.y)
+  .attr('y1', d=>d.source.x)
+  .attr('x2', d=>d.target.y)
+  .attr('y2', d=>d.target.x)
+  .attr('stroke','#555');
+
+svg.selectAll('nodes')
+  .data(root.descendants())
+  .enter()
+  .append('circle')
+  .attr('cx', d=>d.y)
+  .attr('cy', d=>d.x)
+  .attr('r', 6)
+  .attr('fill', d=> d.children ? "#555" : "#fde0dc");
+
+svg.selectAll('labels')
+  .data(root.descendants())
+  .enter()
+  .append('text')
+  .attr('x', d=>d.y + 10)
+  .attr('y', d=>d.x + 4)
+  .text(d=>d.data.name);
+</script>
+
 
 </main>
