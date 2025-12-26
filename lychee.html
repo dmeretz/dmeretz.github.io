@@ -105,10 +105,15 @@ document.addEventListener("DOMContentLoaded", () => {
     "Chirimoya": { order:"Magnoliales", family:"Annonaceae", subfamily:"", genus:"Annona", species:"squamosa", lycheeLike:false },
     "Atemoya": { order:"Magnoliales", family:"Annonaceae", subfamily:"", genus:"Annona", species:"reticulata", lycheeLike:false }
   };
-  
+
   const levels = ["order","family","subfamily","genus","species"];
   const tbody = document.querySelector("#distance-table tbody");
-  const names = Object.keys(taxa);
+  
+  // sort by family then genus
+  const names = Object.keys(taxa).sort((a,b)=>{
+    if(taxa[a].family === taxa[b].family) return taxa[a].genus.localeCompare(taxa[b].genus);
+    return taxa[a].family.localeCompare(taxa[b].family);
+  });
 
   names.forEach(row => {
     const tr = document.createElement("tr");
@@ -120,15 +125,16 @@ document.addEventListener("DOMContentLoaded", () => {
       const td = document.createElement("td");
       let d = 0;
       for(let i=levels.length-1;i>=0;i--){
-        if(taxa[row][levels[i]] && taxa[row][levels[i]] === taxa[col][levels[i]]){
+        if(taxa[row][levels[i]] && taxa[row][levels[i]]===taxa[col][levels[i]]){
           d = 2*(levels.length-1-i);
           break;
         }
         d = 2*levels.length;
       }
       td.textContent = d;
+      // shade only lychee-like
       if(taxa[row].lycheeLike && taxa[col].lycheeLike) td.style.backgroundColor="#fde0dc";
-      td.title = `Común hasta: ${levels[levels.length - d/2 - 1] || "ninguno"}`;
+      td.title = `Nivel común más alto: ${levels[levels.length - d/2 - 1] || "ninguno"}\nGénero: ${taxa[col].genus}\nSubfamilia: ${taxa[col].subfamily}`;
       tr.appendChild(td);
     });
 
@@ -138,47 +144,60 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 
 <h2>Árbol taxonómico interactivo</h2>
+<p>Hover sobre cada nodo para ver subfamilia, género y si es fruta similar al lichi.</p>
 <div id="tree"></div>
+
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script>
 const treeData = {
-  name: "Root",
+  name: "Ordenes",
   children: [
-    { name: "Sapindales",
-      children: [
-        { name: "Sapindaceae",
-          children: [
-            { name: "Sapindoideae", children:[
-              { name:"Lichi"},{ name:"Rambután"},{ name:"Mamoncillo"},
-              { name:"Longan"},{ name:"Pulasan"},{ name:"Ackee"},
-              { name:"Guaraná"},{ name:"Korlan"},{ name:"Soapberries"}
-            ]},
-            { name:"Hippocastanoideae", children:[
-              { name:"Arce"},{ name:"Castaño de indias"}
-            ]}
-          ]
-        }
-      ]
-    },
-    { name: "Malpighiales", children:[
-      { name:"Clusiaceae", children:[{name:"Mangostán"},{name:"Tamarindo malabar"}]}
+    { name: "Sapindales", info:{subfamily:"", genus:""}, children: [
+      { name: "Sapindaceae", info:{subfamily:"", genus:""}, children:[
+        { name:"Sapindoideae", info:{subfamily:"Sapindoideae", genus:""}, children:[
+          {name:"Lichi", info:{subfamily:"Sapindoideae", genus:"Litchi", lycheeLike:true}},
+          {name:"Rambután", info:{subfamily:"Sapindoideae", genus:"Nephelium", lycheeLike:true}},
+          {name:"Mamoncillo", info:{subfamily:"Sapindoideae", genus:"Melicoccus", lycheeLike:true}},
+          {name:"Longan", info:{subfamily:"Sapindoideae", genus:"Dimocarpus", lycheeLike:true}},
+          {name:"Pulasan", info:{subfamily:"Sapindoideae", genus:"Nephelium", lycheeLike:true}},
+          {name:"Ackee", info:{subfamily:"Sapindoideae", genus:"Blighia", lycheeLike:true}},
+          {name:"Guaraná", info:{subfamily:"Sapindoideae", genus:"Paullinia", lycheeLike:true}},
+          {name:"Korlan", info:{subfamily:"Sapindoideae", genus:"Pometia", lycheeLike:true}},
+          {name:"Soapberries", info:{subfamily:"Sapindoideae", genus:"Sapindus", lycheeLike:true}}
+        ]},
+        {name:"Hippocastanoideae", info:{subfamily:"Hippocastanoideae", genus:""}, children:[
+          {name:"Arce", info:{subfamily:"Hippocastanoideae", genus:"Acer", lycheeLike:false}},
+          {name:"Castaño de indias", info:{subfamily:"Hippocastanoideae", genus:"Aesculus", lycheeLike:false}}
+        ]}
+      ]}
     ]},
-    { name: "Magnoliales", children:[
-      { name:"Annonaceae", children:[{name:"Guanábana"},{name:"Chirimoya"},{name:"Atemoya"}]}
+    { name: "Malpighiales", children:[
+      { name:"Clusiaceae", children:[
+        {name:"Mangostán", info:{lycheeLike:false, genus:"Garcinia"}},
+        {name:"Tamarindo malabar", info:{lycheeLike:false, genus:"Garcinia"}}
+      ]}
+    ]},
+    { name:"Magnoliales", children:[
+      { name:"Annonaceae", children:[
+        {name:"Guanábana", info:{lycheeLike:false, genus:"Annona"}},
+        {name:"Chirimoya", info:{lycheeLike:false, genus:"Annona"}},
+        {name:"Atemoya", info:{lycheeLike:false, genus:"Annona"}}
+      ]}
     ]}
   ]
 };
 
-const width = 800, height = 500;
+const width = 900, height = 600;
 const svg = d3.select("#tree").append("svg")
   .attr("width", width)
   .attr("height", height)
-  .append("g").attr("transform","translate(40,0)");
+  .append("g").attr("transform","translate(80,0)");
 
 const root = d3.hierarchy(treeData);
-const treeLayout = d3.tree().size([height, width-160]);
+const treeLayout = d3.tree().size([height-50, width-200]);
 treeLayout(root);
 
+// links
 svg.selectAll('lines')
   .data(root.links())
   .enter()
@@ -189,6 +208,7 @@ svg.selectAll('lines')
   .attr('y2', d=>d.target.x)
   .attr('stroke','#555');
 
+// nodes
 svg.selectAll('nodes')
   .data(root.descendants())
   .enter()
@@ -196,8 +216,11 @@ svg.selectAll('nodes')
   .attr('cx', d=>d.y)
   .attr('cy', d=>d.x)
   .attr('r', 6)
-  .attr('fill', d=> d.children ? "#555" : "#fde0dc");
+  .attr('fill', d=>d.data.info?.lycheeLike ? "#fde0dc" : "#555")
+  .append("title")
+  .text(d => `Nombre: ${d.data.name}\nGénero: ${d.data.info?.genus || "-"}\nSubfamilia: ${d.data.info?.subfamily || "-"}\nLychee-like: ${d.data.info?.lycheeLike ? "Sí":"No"}`);
 
+// labels
 svg.selectAll('labels')
   .data(root.descendants())
   .enter()
@@ -206,6 +229,5 @@ svg.selectAll('labels')
   .attr('y', d=>d.x + 4)
   .text(d=>d.data.name);
 </script>
-
 
 </main>
