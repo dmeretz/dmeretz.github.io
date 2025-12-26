@@ -16,7 +16,7 @@
 
   <p>
     La familia Sapindaceae contiene aproximadamente 140 géneros y casi 2.000 especies,
-    incluyendo many frutas tropicales. Aunque pueden parecer similares, la similitud que comparten
+    incluyendo muchas frutas tropicales. Aunque pueden parecer similares, la similitud que comparten
     se debe a relaciones evolutivas a nivel de familia, no de especie.
   </p>
 
@@ -56,178 +56,174 @@
     <li><a href="https://es.wikipedia.org/wiki/Annona_reticulata" target="_blank"><em>Annona reticulata</em></a> — atemoya</li>
   </ul>
 
- <h2>Tabla de distancias taxonómicas</h2>
-<p>
-Esta tabla compara cuán cercanas están estas especies evolutivamente usando pasos en la clasificación.
-Las celdas en rosa señalan frutas dentro de Sapindaceae consideradas “similares al lichi”.
-</p>
+  <h2>Tabla de distancias taxonómicas</h2>
+  <p>
+    Esta tabla compara cuán cercanas están estas especies evolutivamente usando pasos en la clasificación. 
+    Las celdas en rosa indican frutas consideradas “similares al lichi” (incluyendo algunas fuera de Sapindaceae).
+    Los valores indican la distancia en pasos desde especie → género → subfamilia → familia → orden → phylum.
+  </p>
 
-<table id="distance-table" border="1" style="border-collapse: collapse;">
-  <thead>
-    <tr>
-      <th></th>
-      <th>Lichi</th>
-      <th>Rambután</th>
-      <th>Mamoncillo</th>
-      <th>Longan</th>
-      <th>Pulasan</th>
-      <th>Ackee</th>
-      <th>Guaraná</th>
-      <th>Soapberries</th>
-      <th>Arce</th>
-      <th>Castaño de indias</th>
-      <th>Mangostán</th>
-      <th>Tamarindo malabar</th>
-      <th>Guanábana</th>
-      <th>Chirimoya</th>
-      <th>Atemoya</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+  <table id="distance-table" border="1" style="border-collapse: collapse;">
+    <thead>
+      <tr>
+        <th>Especie</th>
+        <th>Lichi</th>
+        <th>Rambután</th>
+        <th>Mamoncillo</th>
+        <th>Longan</th>
+        <th>Pulasan</th>
+        <th>Ackee</th>
+        <th>Guaraná</th>
+        <th>Korlan</th>
+        <th>Soapberries</th>
+        <th>Arce</th>
+        <th>Castaño de indias</th>
+        <th>Mangostán</th>
+        <th>Guanábana</th>
+        <th>Chirimoya</th>
+        <th>Atemoya</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const taxa = {
-    "Lichi": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Litchi", species:"chinensis", lycheeLike:true },
-    "Rambután": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Nephelium", species:"lappaceum", lycheeLike:true },
-    "Mamoncillo": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Melicoccus", species:"bijugatus", lycheeLike:true },
-    "Longan": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Dimocarpus", species:"longan", lycheeLike:true },
-    "Pulasan": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Nephelium", species:"mutabile", lycheeLike:true },
-    "Ackee": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Blighia", species:"sapida", lycheeLike:true },
-    "Guaraná": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Paullinia", species:"cupana", lycheeLike:true },
-    "Soapberries": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Sapindus", species:"spp", lycheeLike:true },
-    "Arce": { order:"Sapindales", family:"Sapindaceae", subfamily:"Hippocastanoideae", genus:"Acer", species:"spp", lycheeLike:false },
-    "Castaño de indias": { order:"Sapindales", family:"Sapindaceae", subfamily:"Hippocastanoideae", genus:"Aesculus", species:"spp", lycheeLike:false },
-    "Mangostán": { order:"Malpighiales", family:"Clusiaceae", subfamily:"", genus:"Garcinia", species:"mangostana", lycheeLike:false },
-    "Tamarindo malabar": { order:"Malpighiales", family:"Clusiaceae", subfamily:"", genus:"Garcinia", species:"gummi-gutta", lycheeLike:false },
-    "Guanábana": { order:"Magnoliales", family:"Annonaceae", subfamily:"", genus:"Annona", species:"muricata", lycheeLike:false },
-    "Chirimoya": { order:"Magnoliales", family:"Annonaceae", subfamily:"", genus:"Annona", species:"squamosa", lycheeLike:false },
-    "Atemoya": { order:"Magnoliales", family:"Annonaceae", subfamily:"", genus:"Annona", species:"reticulata", lycheeLike:false }
-  };
+  <h2>Árbol taxonómico interactivo</h2>
+  <p>Hover sobre cada nodo para ver subfamilia, género y si es fruta similar al lichi.</p>
+  <div id="tree"></div>
 
-  const levels = ["order","family","subfamily","genus","species"];
-  const tbody = document.querySelector("#distance-table tbody");
-  
-  // sort by family then genus
-  const names = Object.keys(taxa).sort((a,b)=>{
-    if(taxa[a].family === taxa[b].family) return taxa[a].genus.localeCompare(taxa[b].genus);
-    return taxa[a].family.localeCompare(taxa[b].family);
-  });
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const taxa = {
+      "Lichi": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Litchi", species:"chinensis", lycheeLike:true },
+      "Rambután": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Nephelium", species:"lappaceum", lycheeLike:true },
+      "Mamoncillo": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Melicoccus", species:"bijugatus", lycheeLike:true },
+      "Longan": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Dimocarpus", species:"longan", lycheeLike:true },
+      "Pulasan": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Nephelium", species:"mutabile", lycheeLike:true },
+      "Ackee": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Blighia", species:"sapida", lycheeLike:true },
+      "Guaraná": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Paullinia", species:"cupana", lycheeLike:true },
+      "Korlan": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Pometia", species:"pinnata", lycheeLike:true },
+      "Soapberries": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Sapindus", species:"spp", lycheeLike:true },
+      "Arce": { order:"Sapindales", family:"Sapindaceae", subfamily:"Hippocastanoideae", genus:"Acer", species:"spp", lycheeLike:false },
+      "Castaño de indias": { order:"Sapindales", family:"Sapindaceae", subfamily:"Hippocastanoideae", genus:"Aesculus", species:"spp", lycheeLike:false },
+      "Mangostán": { order:"Malpighiales", family:"Clusiaceae", subfamily:"", genus:"Garcinia", species:"mangostana", lycheeLike:true },
+      "Guanábana": { order:"Magnoliales", family:"Annonaceae", subfamily:"", genus:"Annona", species:"muricata", lycheeLike:true },
+      "Chirimoya": { order:"Magnoliales", family:"Annonaceae", subfamily:"", genus:"Annona", species:"squamosa", lycheeLike:true },
+      "Atemoya": { order:"Magnoliales", family:"Annonaceae", subfamily:"", genus:"Annona", species:"reticulata", lycheeLike:true }
+    };
 
-  names.forEach(row => {
-    const tr = document.createElement("tr");
-    const th = document.createElement("th");
-    th.textContent = row;
-    tr.appendChild(th);
-
-    names.forEach(col => {
-      const td = document.createElement("td");
-      let d = 0;
-      for(let i=levels.length-1;i>=0;i--){
-        if(taxa[row][levels[i]] && taxa[row][levels[i]]===taxa[col][levels[i]]){
-          d = 2*(levels.length-1-i);
-          break;
-        }
-        d = 2*levels.length;
-      }
-      td.textContent = d;
-      // shade only lychee-like
-      if(taxa[row].lycheeLike && taxa[col].lycheeLike) td.style.backgroundColor="#fde0dc";
-      td.title = `Nivel común más alto: ${levels[levels.length - d/2 - 1] || "ninguno"}\nGénero: ${taxa[col].genus}\nSubfamilia: ${taxa[col].subfamily}`;
-      tr.appendChild(td);
+    const levels = ["order","family","subfamily","genus","species"];
+    const tbody = document.querySelector("#distance-table tbody");
+    const names = Object.keys(taxa).sort((a,b)=>{
+      if(taxa[a].family === taxa[b].family) return taxa[a].genus.localeCompare(taxa[b].genus);
+      return taxa[a].family.localeCompare(taxa[b].family);
     });
 
-    tbody.appendChild(tr);
+    names.forEach(row => {
+      const tr = document.createElement("tr");
+      const th = document.createElement("th");
+      th.textContent = row;
+      tr.appendChild(th);
+
+      names.forEach(col => {
+        const td = document.createElement("td");
+        let d = levels.length * 2; // default max
+        for(let i=levels.length-1;i>=0;i--){
+          if(taxa[row][levels[i]] && taxa[row][levels[i]]===taxa[col][levels[i]]){
+            d = 2*(levels.length-1-i);
+            break;
+          }
+        }
+        td.textContent = d;
+        if(taxa[row].lycheeLike && taxa[col].lycheeLike) td.style.backgroundColor="#fde0dc";
+        td.title = `Nivel común más alto: ${levels[levels.length - d/2 - 1] || "ninguno"}\nGénero: ${taxa[col].genus}\nSubfamilia: ${taxa[col].subfamily}`;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
   });
-});
-</script>
 
-<h2>Árbol taxonómico interactivo</h2>
-<p>Hover sobre cada nodo para ver subfamilia, género y si es fruta similar al lichi.</p>
-<div id="tree"></div>
-
-<script src="https://d3js.org/d3.v7.min.js"></script>
-<script>
-const treeData = {
-  name: "Ordenes",
-  children: [
-    { name: "Sapindales", info:{subfamily:"", genus:""}, children: [
-      { name: "Sapindaceae", info:{subfamily:"", genus:""}, children:[
-        { name:"Sapindoideae", info:{subfamily:"Sapindoideae", genus:""}, children:[
-          {name:"Lichi", info:{subfamily:"Sapindoideae", genus:"Litchi", lycheeLike:true}},
-          {name:"Rambután", info:{subfamily:"Sapindoideae", genus:"Nephelium", lycheeLike:true}},
-          {name:"Mamoncillo", info:{subfamily:"Sapindoideae", genus:"Melicoccus", lycheeLike:true}},
-          {name:"Longan", info:{subfamily:"Sapindoideae", genus:"Dimocarpus", lycheeLike:true}},
-          {name:"Pulasan", info:{subfamily:"Sapindoideae", genus:"Nephelium", lycheeLike:true}},
-          {name:"Ackee", info:{subfamily:"Sapindoideae", genus:"Blighia", lycheeLike:true}},
-          {name:"Guaraná", info:{subfamily:"Sapindoideae", genus:"Paullinia", lycheeLike:true}},
-          {name:"Korlan", info:{subfamily:"Sapindoideae", genus:"Pometia", lycheeLike:true}},
-          {name:"Soapberries", info:{subfamily:"Sapindoideae", genus:"Sapindus", lycheeLike:true}}
-        ]},
-        {name:"Hippocastanoideae", info:{subfamily:"Hippocastanoideae", genus:""}, children:[
-          {name:"Arce", info:{subfamily:"Hippocastanoideae", genus:"Acer", lycheeLike:false}},
-          {name:"Castaño de indias", info:{subfamily:"Hippocastanoideae", genus:"Aesculus", lycheeLike:false}}
+  // D3 tree
+  const treeData = {
+    name:"Plantas con flores",
+    children:[
+      {name:"Sapindales", children:[
+        {name:"Sapindaceae", children:[
+          {name:"Sapindoideae", children:[
+            {name:"Lichi", info:{genus:"Litchi", subfamily:"Sapindoideae", lycheeLike:true}},
+            {name:"Rambután", info:{genus:"Nephelium", subfamily:"Sapindoideae", lycheeLike:true}},
+            {name:"Mamoncillo", info:{genus:"Melicoccus", subfamily:"Sapindoideae", lycheeLike:true}},
+            {name:"Longan", info:{genus:"Dimocarpus", subfamily:"Sapindoideae", lycheeLike:true}},
+            {name:"Pulasan", info:{genus:"Nephelium", subfamily:"Sapindoideae", lycheeLike:true}},
+            {name:"Ackee", info:{genus:"Blighia", subfamily:"Sapindoideae", lycheeLike:true}},
+            {name:"Guaraná", info:{genus:"Paullinia", subfamily:"Sapindoideae", lycheeLike:true}},
+            {name:"Korlan", info:{genus:"Pometia", subfamily:"Sapindoideae", lycheeLike:true}},
+            {name:"Soapberries", info:{genus:"Sapindus", subfamily:"Sapindoideae", lycheeLike:true}}
+          ]},
+          {name:"Hippocastanoideae", children:[
+            {name:"Arce", info:{genus:"Acer", subfamily:"Hippocastanoideae", lycheeLike:false}},
+            {name:"Castaño de indias", info:{genus:"Aesculus", subfamily:"Hippocastanoideae", lycheeLike:false}}
+          ]}
+        ]}
+      ]},
+      {name:"Malpighiales", children:[
+        {name:"Clusiaceae", children:[
+          {name:"Mangostán", info:{genus:"Garcinia", lycheeLike:true}},
+          {name:"Tamarindo malabar", info:{genus:"Garcinia", lycheeLike:false}}
+        ]}
+      ]},
+      {name:"Magnoliales", children:[
+        {name:"Annonaceae", children:[
+          {name:"Guanábana", info:{genus:"Annona", lycheeLike:true}},
+          {name:"Chirimoya", info:{genus:"Annona", lycheeLike:true}},
+          {name:"Atemoya", info:{genus:"Annona", lycheeLike:true}}
         ]}
       ]}
-    ]},
-    { name: "Malpighiales", children:[
-      { name:"Clusiaceae", children:[
-        {name:"Mangostán", info:{lycheeLike:false, genus:"Garcinia"}},
-        {name:"Tamarindo malabar", info:{lycheeLike:false, genus:"Garcinia"}}
-      ]}
-    ]},
-    { name:"Magnoliales", children:[
-      { name:"Annonaceae", children:[
-        {name:"Guanábana", info:{lycheeLike:false, genus:"Annona"}},
-        {name:"Chirimoya", info:{lycheeLike:false, genus:"Annona"}},
-        {name:"Atemoya", info:{lycheeLike:false, genus:"Annona"}}
-      ]}
-    ]}
-  ]
-};
+    ]
+  };
 
-const width = 900, height = 600;
-const svg = d3.select("#tree").append("svg")
-  .attr("width", width)
-  .attr("height", height)
-  .append("g").attr("transform","translate(80,0)");
+  const width = 1000, height = 600;
+  const svg = d3.select("#tree").append("svg").attr("width",width).attr("height",height)
+    .append("g").attr("transform","translate(100,50)");
 
-const root = d3.hierarchy(treeData);
-const treeLayout = d3.tree().size([height-50, width-200]);
-treeLayout(root);
+  const root = d3.hierarchy(treeData);
+  const treeLayout = d3.tree().size([height-100, width-200]);
+  treeLayout(root);
 
-// links
-svg.selectAll('lines')
-  .data(root.links())
-  .enter()
-  .append('line')
-  .attr('x1', d=>d.source.y)
-  .attr('y1', d=>d.source.x)
-  .attr('x2', d=>d.target.y)
-  .attr('y2', d=>d.target.x)
-  .attr('stroke','#555');
+  // links
+  svg.selectAll('line.link')
+    .data(root.links())
+    .enter()
+    .append('line')
+    .classed('link',true)
+    .attr('x1',d=>d.source.y)
+    .attr('y1',d=>d.source.x)
+    .attr('x2',d=>d.target.y)
+    .attr('y2',d=>d.target.x)
+    .attr('stroke','#555');
 
-// nodes
-svg.selectAll('nodes')
-  .data(root.descendants())
-  .enter()
-  .append('circle')
-  .attr('cx', d=>d.y)
-  .attr('cy', d=>d.x)
-  .attr('r', 6)
-  .attr('fill', d=>d.data.info?.lycheeLike ? "#fde0dc" : "#555")
-  .append("title")
-  .text(d => `Nombre: ${d.data.name}\nGénero: ${d.data.info?.genus || "-"}\nSubfamilia: ${d.data.info?.subfamily || "-"}\nLychee-like: ${d.data.info?.lycheeLike ? "Sí":"No"}`);
+  // nodes
+  const node = svg.selectAll('g.node')
+    .data(root.descendants())
+    .enter()
+    .append('g')
+    .attr('class','node')
+    .attr('transform', d=>`translate(${d.y},${d.x})`);
 
-// labels
-svg.selectAll('labels')
-  .data(root.descendants())
-  .enter()
-  .append('text')
-  .attr('x', d=>d.y + 10)
-  .attr('y', d=>d.x + 4)
-  .text(d=>d.data.name);
-</script>
+  node.append('circle')
+    .attr('r',6)
+    .attr('fill', d=>d.data.info?.lycheeLike ? "#fde0dc" : "#555")
+    .on('mouseover', function(event,d){
+      const info = d.data.info || {};
+      const tooltip = `Nombre: ${d.data.name}\nGénero: ${info.genus || "-"}\nSubfamilia: ${info.subfamily || "-"}\nLychee-like: ${info.lycheeLike ? "Sí":"No"}`;
+      console.log(tooltip);
+    });
 
+  node.append('text')
+    .attr('x',10)
+    .attr('y',4)
+    .text(d=>d.data.name)
+    .style('font-family','sans-serif')
+    .style('font-size','12px');
+  </script>
 </main>
