@@ -30,3 +30,24 @@ main {
 .collection-list li a:hover {
   text-decoration: underline;
 }
+
+table {
+  border-collapse: collapse;
+  margin-top: 1rem;
+  width: 100%;
+  font-size: 0.95rem;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 0.4rem 0.6rem;
+  text-align: center;
+}
+
+th {
+  font-weight: 500;
+}
+
+td {
+  font-variant-numeric: tabular-nums;
+}
