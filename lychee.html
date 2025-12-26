@@ -1,237 +1,139 @@
 <main>
-  <h1>Lychee</h1>
+  <h1>Frutas similares al lichi</h1>
 
   <p>
-    I once claimed that lychee, rambutan, and mamoncillo were basically the same thing.
-    This page is a more careful answer.
+    Una vez afirmé que lichi, rambután y mamoncillo eran básicamente lo mismo.
+    Esta página es una respuesta más cuidadosa.
   </p>
 
-  <h2>Taxonomic context</h2>
+  <h2>Contexto taxonómico</h2>
 
   <p>
-    These fruits all belong to the same plant family:
+    La mayoría de las frutas similares al lichi que se muestran en esta página pertenecen a la familia 
+    <strong>Sapindaceae</strong> (familia de las sapindáceas o "soapberry"). 
+    Esta familia se encuentra dentro del orden <strong>Sapindales</strong>.
   </p>
+
+  <p>
+    La familia Sapindaceae contiene aproximadamente 140 géneros y casi 2.000 especies,
+    incluyendo lichi, rambután, mamoncillo, longan, pulasan, ackee, guaraná, soapberries, arces y castaños de indias. 
+    Aunque estas frutas pueden parecer similares, la similitud que comparten se encuentra a nivel de la familia,
+    no a nivel de especie.
+  </p>
+
+  <h2>Géneros y especies seleccionadas</h2>
+
+  <h3>Sapindaceae (familia de las sapindáceas)</h3>
 
   <ul>
-    <li><strong>Order:</strong> Sapindales</li>
-    <li><strong>Family:</strong> Sapindaceae (the soapberry family)</li>
+    <li><em>Litchi chinensis</em> — lichi</li>
+    <li><em>Dimocarpus longan</em> — longan</li>
+    <li><em>Nephelium lappaceum</em> — rambután</li>
+    <li><em>Nephelium mutabile</em> — pulasan</li>
+    <li><em>Melicoccus bijugatus</em> — mamoncillo / guinep</li>
+    <li><em>Pometia pinnata</em> — korlan / matoa</li>
+    <li><em>Blighia sapida</em> — ackee</li>
+    <li><em>Paullinia cupana</em> — guaraná</li>
+    <li><em>Sapindus</em> spp. — soapberries</li>
+    <li><em>Acer</em> spp. — arces</li>
+    <li><em>Aesculus</em> spp. — castaños de indias</li>
+    <li><em>Schleichera trijuga</em> — aceite de Macasar</li>
+    <li><em>Koelreuteria</em>, <em>Cardiospermum</em>, <em>Ungnadia</em> — ornamentales</li>
   </ul>
 
+  <h3>Clusiaceae</h3>
+  <ul>
+    <li><em>Garcinia mangostana</em> — mangostán</li>
+    <li><em>Garcinia gummi-gutta</em> — tamarindo malabar</li>
+  </ul>
+
+  <h3>Annonaceae</h3>
+  <ul>
+    <li><em>Annona muricata</em> — guanábana / soursop</li>
+    <li><em>Annona squamosa</em> — chirimoya / sugar apple</li>
+    <li><em>Annona reticulata</em> — atemoya</li>
+  </ul>
+
+  <h2>Tabla de distancias taxonómicas</h2>
+
   <p>
-    Sapindaceae contains around 140 genera and nearly 2,000 species,
-    including maples, horse chestnuts, and several tropical fruits.
-    The similarity between lychee, rambutan, and mamoncillo lives at the level of
-    <em>family</em>, not species.
+    La siguiente tabla muestra las distancias taxonómicas entre todas las especies seleccionadas.
+    Cada número indica la cantidad de pasos necesarios en la clasificación desde la especie hasta el orden 
+    (Especie → Género → Subfamilia → Familia → Orden). 
+    Cuanto menor sea el número, más cercanas están evolutivamente.
+    Las celdas en rosa representan frutas comestibles similares al lichi dentro de la familia Sapindaceae.
   </p>
 
- <h2>Selected genera and species</h2>
+  <table id="distance-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Lichi</th>
+        <th>Rambután</th>
+        <th>Pulasan</th>
+        <th>Mamoncillo</th>
+        <th>Longan</th>
+        <th>Ackee</th>
+        <th>Guaraná</th>
+        <th>Soapberries</th>
+        <th>Korlan</th>
+        <th>Arce</th>
+        <th>Castaño de indias</th>
+        <th>Mangostán</th>
+        <th>Guanábana</th>
+        <th>Chirimoya</th>
+        <th>Atemoya</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-<h3>Sapindaceae (soapberry family)</h3>
+  <script>
+  const taxa = {
+    "Lichi": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Litchi", species:"chinensis", lycheeLike:true },
+    "Rambután": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Nephelium", species:"lappaceum", lycheeLike:true },
+    "Pulasan": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Nephelium", species:"mutabile", lycheeLike:true },
+    "Mamoncillo": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Melicoccus", species:"bijugatus", lycheeLike:true },
+    "Longan": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Dimocarpus", species:"longan", lycheeLike:true },
+    "Ackee": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Blighia", species:"sapida", lycheeLike:true },
+    "Guaraná": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Paullinia", species:"cupana", lycheeLike:true },
+    "Soapberries": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Sapindus", species:"spp", lycheeLike:true },
+    "Korlan": { order:"Sapindales", family:"Sapindaceae", subfamily:"Sapindoideae", genus:"Pometia", species:"pinnata", lycheeLike:true },
+    "Arce": { order:"Sapindales", family:"Sapindaceae", subfamily:"Hippocastanoideae", genus:"Acer", species:"spp", lycheeLike:false },
+    "Castaño de indias": { order:"Sapindales", family:"Sapindaceae", subfamily:"Hippocastanoideae", genus:"Aesculus", species:"spp", lycheeLike:false },
+    "Mangostán": { order:"Malpighiales", family:"Clusiaceae", subfamily:"", genus:"Garcinia", species:"mangostana", lycheeLike:false },
+    "Guanábana": { order:"Magnoliales", family:"Annonaceae", subfamily:"", genus:"Annona", species:"muricata", lycheeLike:false },
+    "Chirimoya": { order:"Magnoliales", family:"Annonaceae", subfamily:"", genus:"Annona", species:"squamosa", lycheeLike:false },
+    "Atemoya": { order:"Magnoliales", family:"Annonaceae", subfamily:"", genus:"Annona", species:"reticulata", lycheeLike:false }
+  };
 
-<ul>
-  <li>
-    <strong><em>Litchi chinensis</em></strong> — lychee  
-    (archetype: translucent flesh, floral sweetness)  
-    <a href="https://www.youtube.com/" target="_blank">video</a>
-  </li>
+  const levels = ["order","family","subfamily","genus","species"];
+  const tbody = document.querySelector("#distance-table tbody");
+  const names = Object.keys(taxa);
 
-  <li>
-    <strong><em>Dimocarpus longan</em></strong> — longan  
-    (very close to lychee; less aromatic)  
-    <a href="https://en.wikipedia.org/wiki/Longan" target="_blank">wiki</a>
-  </li>
+  names.forEach(row => {
+    const tr = document.createElement("tr");
+    const th = document.createElement("th");
+    th.textContent = row;
+    tr.appendChild(th);
 
-  <li>
-    <strong><em>Nephelium lappaceum</em></strong> — rambutan  
-    (lychee-like; thick hairy rind)  
-    <a href="https://www.youtube.com/" target="_blank">video</a>
-  </li>
+    names.forEach(col => {
+      const td = document.createElement("td");
+      let d = 2*levels.length; // default max
+      for(let i=levels.length-1;i>=0;i--){
+        if(taxa[row][levels[i]] && taxa[row][levels[i]]===taxa[col][levels[i]]){
+          d = 2*(levels.length-1-i);
+          break;
+        }
+      }
+      td.textContent = d;
+      // Sombras para frutas similares al lichi
+      if(taxa[row].lycheeLike && taxa[col].lycheeLike) td.style.backgroundColor="#fde0dc";
+      tr.appendChild(td);
+    });
 
-  <li>
-    <strong><em>Nephelium mutabile</em></strong> — pulasan  
-    (lychee-like; denser flesh than rambutan)  
-    <a href="https://en.wikipedia.org/wiki/Pulasan" target="_blank">wiki</a>
-  </li>
-
-  <li>
-    <strong><em>Melicoccus bijugatus</em></strong> — guinip / mamoncillo  
-    (partially lychee-like; thin pulp, large seed)  
-    <a href="https://www.youtube.com/" target="_blank">video</a>
-  </li>
-
-  <li>
-    <strong><em>Pometia pinnata</em></strong> — korlan / matoa  
-    (lychee-like; Southeast Asian)  
-    <a href="https://en.wikipedia.org/wiki/Pometia_pinnata" target="_blank">wiki</a>
-  </li>
-
-  <li>
-    <strong><em>Blighia sapida</em></strong> — ackee  
-    (Sapindaceae; toxic unless prepared)  
-    <a href="https://en.wikipedia.org/wiki/Ackee" target="_blank">wiki</a>
-  </li>
-
-  <li>
-    <strong><em>Paullinia cupana</em></strong> — guaraná  
-    (economically important stimulant seed)  
-    <a href="https://en.wikipedia.org/wiki/Guarana" target="_blank">wiki</a>
-  </li>
-
-  <li>
-    <strong><em>Sapindus</em></strong> spp. — soapberries  
-    (saponin-rich; detergents, cosmetics)  
-    <a href="https://en.wikipedia.org/wiki/Sapindus" target="_blank">wiki</a>
-  </li>
-
-  <li>
-    <strong><em>Acer</em></strong> spp. — maples  
-    (sap → maple syrup; wood)  
-    <a href="https://en.wikipedia.org/wiki/Acer_(plant)" target="_blank">wiki</a>
-  </li>
-
-  <li>
-    <strong><em>Aesculus</em></strong> spp. — buckeyes / horse chestnuts  
-    (wood; ornamental)  
-    <a href="https://en.wikipedia.org/wiki/Aesculus" target="_blank">wiki</a>
-  </li>
-
-  <li>
-    <strong><em>Schleichera trijuga</em></strong> — kusum tree  
-    (source of Indian macassar oil)  
-    <a href="https://en.wikipedia.org/wiki/Schleichera" target="_blank">wiki</a>
-  </li>
-
-  <li>
-    <strong><em>Koelreuteria</em>, <em>Cardiospermum</em>, <em>Ungnadia</em></strong>  
-    (ornamental genera)  
-    <a href="https://en.wikipedia.org/wiki/Koelreuteria" target="_blank">wiki</a>
-  </li>
-</ul>
-
-<h3>Related but outside Sapindaceae</h3>
-
-<ul>
-  <li>
-    <strong><em>Garcinia mangostana</em></strong> — mangosteen  
-    (Clusiaceae; similar flesh, thick rind)  
-    <a href="https://en.wikipedia.org/wiki/Mangosteen" target="_blank">wiki</a>
-  </li>
-
-  <li>
-    <strong><em>Annona</em></strong> spp. — custard apples  
-    (Annonaceae; segmented flesh, creamy texture)  
-    <a href="https://en.wikipedia.org/wiki/Annona" target="_blank">wiki</a>
-  </li>
-</ul>
-
-<h2>Pairwise taxonomic distances</h2>
-
-<p>
-Distances are measured as steps between taxa in the classification
-(Order → Family → Subfamily → Genus → Species).
-Lower values indicate closer evolutionary relationships.
-</p>
-
-<table id="distance-table">
-  <thead>
-    <tr>
-      <th></th>
-      <th>Lychee</th>
-      <th>Rambutan</th>
-      <th>Mamoncillo</th>
-      <th>Longan</th>
-      <th>Ackee</th>
-      <th>Mangosteen</th>
-      <th>Custard apple</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
-
-<script>
-const taxa = {
-  "Lychee": {
-    order: "Sapindales",
-    family: "Sapindaceae",
-    subfamily: "Sapindoideae",
-    genus: "Litchi",
-    species: "chinensis"
-  },
-  "Rambutan": {
-    order: "Sapindales",
-    family: "Sapindaceae",
-    subfamily: "Sapindoideae",
-    genus: "Nephelium",
-    species: "lappaceum"
-  },
-  "Mamoncillo": {
-    order: "Sapindales",
-    family: "Sapindaceae",
-    subfamily: "Sapindoideae",
-    genus: "Melicoccus",
-    species: "bijugatus"
-  },
-  "Longan": {
-    order: "Sapindales",
-    family: "Sapindaceae",
-    subfamily: "Sapindoideae",
-    genus: "Dimocarpus",
-    species: "longan"
-  },
-  "Ackee": {
-    order: "Sapindales",
-    family: "Sapindaceae",
-    subfamily: "Sapindoideae",
-    genus: "Blighia",
-    species: "sapida"
-  },
-  "Mangosteen": {
-    order: "Malpighiales",
-    family: "Clusiaceae",
-    subfamily: "",
-    genus: "Garcinia",
-    species: "mangostana"
-  },
-  "Custard apple": {
-    order: "Magnoliales",
-    family: "Annonaceae",
-    subfamily: "",
-    genus: "Annona",
-    species: "spp"
-  }
-};
-
-const levels = ["order", "family", "subfamily", "genus", "species"];
-
-function distance(a, b) {
-  if (a === b) return 0;
-  for (let i = levels.length - 1; i >= 0; i--) {
-    if (
-      taxa[a][levels[i]] &&
-      taxa[a][levels[i]] === taxa[b][levels[i]]
-    ) {
-      return 2 * (levels.length - 1 - i);
-    }
-  }
-  return 2 * levels.length;
-}
-
-const tbody = document.querySelector("#distance-table tbody");
-const names = Object.keys(taxa);
-
-names.forEach(row => {
-  const tr = document.createElement("tr");
-  const th = document.createElement("th");
-  th.textContent = row;
-  tr.appendChild(th);
-
-  names.forEach(col => {
-    const td = document.createElement("td");
-    td.textContent = distance(row, col);
-    tr.appendChild(td);
+    tbody.appendChild(tr);
   });
+  </script>
 
-  tbody.appendChild(tr);
-});
-</script>
 </main>
