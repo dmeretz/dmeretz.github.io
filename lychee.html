@@ -1,20 +1,178 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Lychee</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <main>
-    <h1>Lychee</h1>
-    <p>Content about lychee goes here. You can add:</p>
-    <ul>
-      <li>Audio recordings</li>
-      <li>Images</li>
-      <li>Notes or small computations</li>
-    </ul>
-    <p><a href="index.html">← Back to collection</a></p>
-  </main>
-</body>
-</html>
+<main>
+  <h1>Lychee</h1>
+
+  <p>
+    I once claimed that lychee, rambutan, and mamoncillo were basically the same thing.
+    This page is a more careful answer.
+  </p>
+
+  <h2>Taxonomic context</h2>
+
+  <p>
+    These fruits all belong to the same plant family:
+  </p>
+
+  <ul>
+    <li><strong>Order:</strong> Sapindales</li>
+    <li><strong>Family:</strong> Sapindaceae (the soapberry family)</li>
+  </ul>
+
+  <p>
+    Sapindaceae contains around 140 genera and nearly 2,000 species,
+    including maples, horse chestnuts, and several tropical fruits.
+    The similarity between lychee, rambutan, and mamoncillo lives at the level of
+    <em>family</em>, not species.
+  </p>
+
+  <h2>Selected genera and species</h2>
+
+  <details>
+    <summary><strong>Litchi</strong> (lychee)</summary>
+    <p>
+      <em>Litchi chinensis</em> is the sole species in its genus.
+      Native to southern China, it produces the familiar rough red shell
+      and translucent white flesh.
+    </p>
+    <p>
+      Video reference:
+      <a href="https://www.youtube.com/" target="_blank">
+        Fruits of Colombia – lychee
+      </a>
+    </p>
+  </details>
+
+  <details>
+    <summary><strong>Nephelium</strong> (rambutan, pulasan)</summary>
+    <p>
+      The genus <em>Nephelium</em> includes rambutan (<em>Nephelium lappaceum</em>)
+      and several closely related fruits.
+      Rambutan differs from lychee mainly in the thick, hairy pericarp.
+    </p>
+    <p>
+      Video reference:
+      <a href="https://www.youtube.com/" target="_blank">
+        Fruits of Colombia – rambutan
+      </a>
+    </p>
+  </details>
+
+  <details>
+    <summary><strong>Melicoccus</strong> (mamoncillo / guinep)</summary>
+    <p>
+      <em>Melicoccus bijugatus</em> is native to the Caribbean and northern South America.
+      The fruit has a thinner layer of edible pulp tightly bound to a large seed.
+    </p>
+    <p>
+      Video reference:
+      <a href="https://www.youtube.com/" target="_blank">
+        Fruits of Colombia – mamoncillo
+      </a>
+    </p>
+  </details>
+
+  <details>
+    <summary><strong>Dimocarpus</strong> (longan)</summary>
+    <p>
+      Longan (<em>Dimocarpus longan</em>) is often described as a “less perfumed” lychee.
+      It is extremely close morphologically and chemically.
+    </p>
+  </details>
+
+  <h2>Conclusion</h2>
+
+  <p>
+    These fruits are not the same species, or even the same genus.
+    But they are close relatives within Sapindaceae, shaped by similar evolutionary pressures.
+    So the claim was wrong in detail, but not in spirit.
+  </p>
+
+<h2>Pairwise taxonomic distances</h2>
+
+<p>
+Distances are measured as the number of steps between taxa in the classification
+(Order → Family → Subfamily → Genus → Species).
+Lower numbers indicate closer biological relationships.
+</p>
+
+<table id="distance-table">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Lychee</th>
+      <th>Rambutan</th>
+      <th>Mamoncillo</th>
+      <th>Longan</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+  <p>
+    <a href="index.html">← Back to collection</a>
+  </p>
+
+
+<script>
+const taxa = {
+  "Lychee": {
+    order: "Sapindales",
+    family: "Sapindaceae",
+    subfamily: "Sapindoideae",
+    genus: "Litchi",
+    species: "chinensis"
+  },
+  "Rambutan": {
+    order: "Sapindales",
+    family: "Sapindaceae",
+    subfamily: "Sapindoideae",
+    genus: "Nephelium",
+    species: "lappaceum"
+  },
+  "Mamoncillo": {
+    order: "Sapindales",
+    family: "Sapindaceae",
+    subfamily: "Sapindoideae",
+    genus: "Melicoccus",
+    species: "bijugatus"
+  },
+  "Longan": {
+    order: "Sapindales",
+    family: "Sapindaceae",
+    subfamily: "Sapindoideae",
+    genus: "Dimocarpus",
+    species: "longan"
+  }
+};
+
+const levels = ["order", "family", "subfamily", "genus", "species"];
+
+function distance(a, b) {
+  if (a === b) return 0;
+  for (let i = levels.length - 1; i >= 0; i--) {
+    if (taxa[a][levels[i]] === taxa[b][levels[i]]) {
+      return 2 * (levels.length - 1 - i);
+    }
+  }
+  return 2 * levels.length;
+}
+
+const tbody = document.querySelector("#distance-table tbody");
+const names = Object.keys(taxa);
+
+names.forEach(row => {
+  const tr = document.createElement("tr");
+  const th = document.createElement("th");
+  th.textContent = row;
+  tr.appendChild(th);
+
+  names.forEach(col => {
+    const td = document.createElement("td");
+    td.textContent = distance(row, col);
+    tr.appendChild(td);
+  });
+
+  tbody.appendChild(tr);
+});
+</script>
+
+</main>
