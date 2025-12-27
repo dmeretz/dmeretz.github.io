@@ -113,14 +113,14 @@
 
   <hr>
 
-  <h2>Pairwise taxonomic distance table</h2>
+ <h2>Pairwise taxonomic distance table</h2>
 
 <p>
-  Distances are measured as the number of upward steps in the taxonomic hierarchy
-  required to reach the lowest common ancestor (LCA) of the two species.
+Distances are measured as the number of upward steps in the taxonomic hierarchy
+required to reach the lowest common ancestor (LCA).
 </p>
 
-<table border="1" style="border-collapse:collapse; text-align:center;">
+<table border="1" style="border-collapse:collapse; text-align:center; font-size:12px;">
   <thead>
     <tr>
       <th>Species</th>
@@ -129,7 +129,7 @@
       <th>Pulasan</th>
       <th>Longan</th>
       <th>Mamoncillo</th>
-      <th>Korlan</th>
+      <th>Matoa</th>
       <th>Ackee</th>
       <th>Guaraná</th>
       <th>Soapberry</th>
@@ -142,102 +142,191 @@
     </tr>
   </thead>
   <tbody>
-    <tr><th>Lychee</th><td>0</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>4</td><td>4</td><td>6</td><td>6</td><td>6</td><td>6</td></tr>
-    <tr><th>Rambutan</th><td>2</td><td>0</td><td>1</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>4</td><td>4</td><td>6</td><td>6</td><td>6</td><td>6</td></tr>
-    <tr><th>Pulasan</th><td>2</td><td>1</td><td>0</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>4</td><td>4</td><td>6</td><td>6</td><td>6</td><td>6</td></tr>
-    <tr><th>Longan</th><td>2</td><td>2</td><td>2</td><td>0</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>4</td><td>4</td><td>6</td><td>6</td><td>6</td><td>6</td></tr>
-    <tr><th>Mamoncillo</th><td>2</td><td>2</td><td>2</td><td>2</td><td>0</td><td>2</td><td>2</td><td>2</td><td>2</td><td>4</td><td>4</td><td>6</td><td>6</td><td>6</td><td>6</td></tr>
-    <tr><th>Korlan</th><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>0</td><td>2</td><td>2</td><td>2</td><td>4</td><td>4</td><td>6</td><td>6</td><td>6</td><td>6</td></tr>
-    <tr><th>Ackee</th><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>0</td><td>2</td><td>2</td><td>4</td><td>4</td><td>6</td><td>6</td><td>6</td><td>6</td></tr>
-    <tr><th>Guaraná</th><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>0</td><td>2</td><td>4</td><td>4</td><td>6</td><td>6</td><td>6</td><td>6</td></tr>
-    <tr><th>Soapberry</th><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>0</td><td>4</td><td>4</td><td>6</td><td>6</td><td>6</td><td>6</td></tr>
-    <tr><th>Maple</th><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>0</td><td>2</td><td>6</td><td>6</td><td>6</td><td>6</td></tr>
-    <tr><th>Horse chestnut</th><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>2</td><td>0</td><td>6</td><td>6</td><td>6</td><td>6</td></tr>
-    <tr><th>Mangosteen</th><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>0</td><td>6</td><td>6</td><td>6</td></tr>
-    <tr><th>Soursop</th><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>0</td><td>1</td><td>1</td></tr>
-    <tr><th>Sugar apple</th><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>1</td><td>0</td><td>1</td></tr>
-    <tr><th>Atemoya</th><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td><td>1</td><td>1</td><td>0</td></tr>
+    <!-- Row 1 -->
+    <tr><th>Lychee</th>
+      <td>0</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td>
+      <td>3</td><td>3</td><td>4</td><td>4</td><td>4</td><td>4</td>
+    </tr>
+
+    <!-- Row 2 -->
+    <tr><th>Rambutan</th>
+      <td>2</td><td>0</td><td>1</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td>
+      <td>3</td><td>3</td><td>4</td><td>4</td><td>4</td><td>4</td>
+    </tr>
+
+    <!-- Row 3 -->
+    <tr><th>Pulasan</th>
+      <td>2</td><td>1</td><td>0</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td>
+      <td>3</td><td>3</td><td>4</td><td>4</td><td>4</td><td>4</td>
+    </tr>
+
+    <!-- Row 4 -->
+    <tr><th>Longan</th>
+      <td>2</td><td>2</td><td>2</td><td>0</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td>
+      <td>3</td><td>3</td><td>4</td><td>4</td><td>4</td><td>4</td>
+    </tr>
+
+    <!-- Row 5 -->
+    <tr><th>Mamoncillo</th>
+      <td>2</td><td>2</td><td>2</td><td>2</td><td>0</td><td>2</td><td>2</td><td>2</td><td>2</td>
+      <td>3</td><td>3</td><td>4</td><td>4</td><td>4</td><td>4</td>
+    </tr>
+
+    <!-- Row 6 -->
+    <tr><th>Matoa</th>
+      <td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>0</td><td>2</td><td>2</td><td>2</td>
+      <td>3</td><td>3</td><td>4</td><td>4</td><td>4</td><td>4</td>
+    </tr>
+
+    <!-- Row 7 -->
+    <tr><th>Ackee</th>
+      <td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>0</td><td>2</td><td>2</td>
+      <td>3</td><td>3</td><td>4</td><td>4</td><td>4</td><td>4</td>
+    </tr>
+
+    <!-- Row 8 -->
+    <tr><th>Guaraná</th>
+      <td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>0</td><td>2</td>
+      <td>3</td><td>3</td><td>4</td><td>4</td><td>4</td><td>4</td>
+    </tr>
+
+    <!-- Row 9 -->
+    <tr><th>Soapberry</th>
+      <td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>0</td>
+      <td>3</td><td>3</td><td>4</td><td>4</td><td>4</td><td>4</td>
+    </tr>
+
+    <!-- Row 10 -->
+    <tr><th>Maple</th>
+      <td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td>
+      <td>0</td><td>2</td><td>4</td><td>4</td><td>4</td><td>4</td>
+    </tr>
+
+    <!-- Row 11 -->
+    <tr><th>Horse chestnut</th>
+      <td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td>
+      <td>2</td><td>0</td><td>4</td><td>4</td><td>4</td><td>4</td>
+    </tr>
+
+    <!-- Row 12 -->
+    <tr><th>Mangosteen</th>
+      <td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td>
+      <td>4</td><td>4</td><td>0</td><td>4</td><td>4</td><td>4</td>
+    </tr>
+
+    <!-- Row 13 -->
+    <tr><th>Soursop</th>
+      <td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td>
+      <td>4</td><td>4</td><td>4</td><td>0</td><td>1</td><td>1</td>
+    </tr>
+
+    <!-- Row 14 -->
+    <tr><th>Sugar apple</th>
+      <td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td>
+      <td>4</td><td>4</td><td>4</td><td>1</td><td>0</td><td>1</td>
+    </tr>
+
+    <!-- Row 15 -->
+    <tr><th>Atemoya</th>
+      <td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td>
+      <td>4</td><td>4</td><td>4</td><td>1</td><td>1</td><td>0</td>
+    </tr>
   </tbody>
 </table>
 
+
   <hr>
 
-  <h2>Complete taxonomic tree (static)</h2>
+ <h2>Taxonomic tree (class → order → family → genus → species)</h2>
 
-  <p>
-    Structure: <strong>Domain → Kingdom → Phylum → Class → Order → Family → Genus → Species</strong>
-  </p>
+<svg width="1200" height="700" viewBox="0 0 1200 700"
+     xmlns="http://www.w3.org/2000/svg"
+     style="border:1px solid #ccc; background:#fafafa;">
 
-  <ul>
-    <li><strong>Class: Magnoliopsida</strong>
-      <ul>
+  <!-- ===== ROOT ===== -->
+  <circle cx="600" cy="50" r="18" fill="#444"/>
+  <text x="600" y="20" text-anchor="middle" font-size="14">Class</text>
+  <text x="600" y="75" text-anchor="middle" font-size="12">Magnoliopsida</text>
 
-        <li>Order: Sapindales
-          <ul>
-            <li>Family: Sapindaceae
-              <ul>
-                <li>Genus: <em>Litchi</em>
-                  <ul><li style="background:#fde0dc">Species: <em>Litchi chinensis</em></li></ul>
-                </li>
-                <li>Genus: <em>Nephelium</em>
-                  <ul>
-                    <li style="background:#fde0dc"><em>N. lappaceum</em></li>
-                    <li style="background:#fde0dc"><em>N. mutabile</em></li>
-                  </ul>
-                </li>
-                <li>Genus: <em>Dimocarpus</em>
-                  <ul><li style="background:#fde0dc"><em>D. longan</em></li></ul>
-                </li>
-                <li>Genus: <em>Melicoccus</em>
-                  <ul><li style="background:#fde0dc"><em>M. bijugatus</em></li></ul>
-                </li>
-                <li>Genus: <em>Pometia</em>
-                  <ul><li style="background:#fde0dc"><em>P. pinnata</em></li></ul>
-                </li>
-                <li>Genus: <em>Blighia</em>
-                  <ul><li><em>B. sapida</em></li></ul>
-                </li>
-                <li>Genus: <em>Paullinia</em>
-                  <ul><li><em>P. cupana</em></li></ul>
-                </li>
-                <li>Genus: <em>Sapindus</em>
-                  <ul><li><em>Sapindus</em> spp.</li></ul>
-                </li>
-              </ul>
-            </li>
-          </ul>
-        </li>
+  <!-- ===== ORDERS ===== -->
+  <!-- Sapindales -->
+  <circle cx="300" cy="150" r="16" fill="#666"/>
+  <line x1="600" y1="68" x2="300" y2="134" stroke="#555"/>
+  <text x="300" y="180" text-anchor="middle">Sapindales</text>
 
-        <li>Order: Malpighiales
-          <ul>
-            <li>Family: Clusiaceae
-              <ul>
-                <li>Genus: <em>Garcinia</em>
-                  <ul><li style="background:#fde0dc"><em>G. mangostana</em></li></ul>
-                </li>
-              </ul>
-            </li>
-          </ul>
-        </li>
+  <!-- Malpighiales -->
+  <circle cx="600" cy="150" r="16" fill="#666"/>
+  <line x1="600" y1="68" x2="600" y2="134" stroke="#555"/>
+  <text x="600" y="180" text-anchor="middle">Malpighiales</text>
 
-        <li>Order: Magnoliales
-          <ul>
-            <li>Family: Annonaceae
-              <ul>
-                <li>Genus: <em>Annona</em>
-                  <ul>
-                    <li style="background:#fde0dc"><em>A. muricata</em></li>
-                    <li style="background:#fde0dc"><em>A. squamosa</em></li>
-                    <li style="background:#fde0dc"><em>Atemoya</em></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-          </ul>
-        </li>
+  <!-- Magnoliales -->
+  <circle cx="900" cy="150" r="16" fill="#666"/>
+  <line x1="600" y1="68" x2="900" y2="134" stroke="#555"/>
+  <text x="900" y="180" text-anchor="middle">Magnoliales</text>
 
-      </ul>
-    </li>
-  </ul>
+  <!-- ===== FAMILIES ===== -->
+  <!-- Sapindaceae -->
+  <circle cx="300" cy="260" r="14" fill="#888"/>
+  <line x1="300" y1="166" x2="300" y2="246" stroke="#555"/>
+  <text x="300" y="290" text-anchor="middle">Sapindaceae</text>
+
+  <!-- Clusiaceae -->
+  <circle cx="600" cy="260" r="14" fill="#888"/>
+  <line x1="600" y1="166" x2="600" y2="246" stroke="#555"/>
+  <text x="600" y="290" text-anchor="middle">Clusiaceae</text>
+
+  <!-- Annonaceae -->
+  <circle cx="900" cy="260" r="14" fill="#888"/>
+  <line x1="900" y1="166" x2="900" y2="246" stroke="#555"/>
+  <text x="900" y="290" text-anchor="middle">Annonaceae</text>
+
+  <!-- ===== GENERA (Sapindaceae) ===== -->
+  <circle cx="150" cy="380" r="12" fill="#aaa"/>
+  <line x1="300" y1="274" x2="150" y2="368" stroke="#555"/>
+  <text x="150" y="405" text-anchor="middle">Litchi</text>
+
+  <circle cx="230" cy="380" r="12" fill="#aaa"/>
+  <line x1="300" y1="274" x2="230" y2="368" stroke="#555"/>
+  <text x="230" y="405" text-anchor="middle">Nephelium</text>
+
+  <circle cx="300" cy="380" r="12" fill="#aaa"/>
+  <line x1="300" y1="274" x2="300" y2="368" stroke="#555"/>
+  <text x="300" y="405" text-anchor="middle">Dimocarpus</text>
+
+  <circle cx="370" cy="380" r="12" fill="#aaa"/>
+  <line x1="300" y1="274" x2="370" y2="368" stroke="#555"/>
+  <text x="370" y="405" text-anchor="middle">Melicoccus</text>
+
+  <circle cx="450" cy="380" r="12" fill="#aaa"/>
+  <line x1="300" y1="274" x2="450" y2="368" stroke="#555"/>
+  <text x="450" y="405" text-anchor="middle">Others</text>
+
+  <!-- ===== SPECIES (Sapindaceae) ===== -->
+  <text x="150" y="450" text-anchor="middle" font-size="12">L. chinensis</text>
+  <line x1="150" y1="392" x2="150" y2="435" stroke="#555"/>
+
+  <text x="210" y="450" text-anchor="middle" font-size="12">N. lappaceum</text>
+  <line x1="230" y1="392" x2="210" y2="435" stroke="#555"/>
+
+  <text x="250" y="470" text-anchor="middle" font-size="12">N. mutabile</text>
+  <line x1="230" y1="392" x2="250" y2="455" stroke="#555"/>
+
+  <text x="300" y="450" text-anchor="middle" font-size="12">D. longan</text>
+  <line x1="300" y1="392" x2="300" y2="435" stroke="#555"/>
+
+  <text x="370" y="450" text-anchor="middle" font-size="12">M. bijugatus</text>
+  <line x1="370" y1="392" x2="370" y2="435" stroke="#555"/>
+
+  <!-- ===== SPECIES (Other orders) ===== -->
+  <text x="600" y="380" text-anchor="middle">Garcinia mangostana</text>
+  <line x1="600" y1="274" x2="600" y2="365" stroke="#555"/>
+
+  <text x="900" y="380" text-anchor="middle">Annona muricata</text>
+  <text x="900" y="410" text-anchor="middle">A. squamosa</text>
+  <text x="900" y="440" text-anchor="middle">Atemoya</text>
+  <line x1="900" y1="274" x2="900" y2="365" stroke="#555"/>
+
+</svg>
+
 
 </main>
