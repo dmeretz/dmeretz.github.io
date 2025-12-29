@@ -661,121 +661,12 @@ required to reach the lowest common ancestor (LCA).
 
   <hr>
 
-<h2>Taxonomic tree (Class → Order → Family → Genus → Species)</h2>
+<h2>Taxonomic tree (Newick format)</h2>
 
-<svg width="1400" height="820" viewBox="0 0 1400 820"
-     xmlns="http://www.w3.org/2000/svg">
+<pre class="newick-tree">
+(ZapoteNegro,(Jaboticaba,((Atemoya,(Soursop,SugarApple)),((Lansium,(HorseChestnut,(Maple,(Soapberry,(Guarana,(Ackee,(Matoa,(Mamoncillo,(Longan,(Lychee,(Rambutan,Pulasan))))))))))),(Gulupa,(Mangosteen,Bacuri))))));
+</pre>
 
-  <!-- COLUMN HEADINGS -->
-  <text x="100" y="30" text-anchor="middle">Class</text>
-  <text x="300" y="30" text-anchor="middle">Order</text>
-  <text x="500" y="30" text-anchor="middle">Family</text>
-  <text x="700" y="30" text-anchor="middle">Genus</text>
-  <text x="1000" y="30" text-anchor="middle">Species</text>
-
-  <!-- CLASS -->
-  <circle cx="100" cy="80" r="14" fill="#444"/>
-  <text x="100" y="110" text-anchor="middle" font-size="12">Magnoliopsida</text>
-
-  <!-- ORDERS -->
-  <circle cx="300" cy="120" r="12" fill="#666"/>
-  <circle cx="300" cy="420" r="12" fill="#666"/>
-  <circle cx="300" cy="620" r="12" fill="#666"/>
-
-  <line x1="114" y1="80" x2="286" y2="120" stroke="#555"/>
-  <line x1="114" y1="80" x2="286" y2="420" stroke="#555"/>
-  <line x1="114" y1="80" x2="286" y2="620" stroke="#555"/>
-
-  <text x="300" y="150" text-anchor="middle">Sapindales</text>
-  <text x="300" y="450" text-anchor="middle">Malpighiales</text>
-  <text x="300" y="650" text-anchor="middle">Magnoliales</text>
-
-  <!-- FAMILIES -->
-  <circle cx="500" cy="120" r="12" fill="#888"/>
-  <circle cx="500" cy="200" r="12" fill="#888"/>
-  <circle cx="500" cy="420" r="12" fill="#888"/>
-  <circle cx="500" cy="620" r="12" fill="#888"/>
-
-  <line x1="312" y1="120" x2="488" y2="120" stroke="#555"/>
-  <line x1="312" y1="120" x2="488" y2="200" stroke="#555"/>
-  <line x1="312" y1="420" x2="488" y2="420" stroke="#555"/>
-  <line x1="312" y1="620" x2="488" y2="620" stroke="#555"/>
-
-  <text x="500" y="150" text-anchor="middle">Sapindaceae</text>
-  <text x="500" y="230" text-anchor="middle">Hippocastanoideae</text>
-  <text x="500" y="450" text-anchor="middle">Clusiaceae</text>
-  <text x="500" y="650" text-anchor="middle">Annonaceae</text>
-
-  <!-- GENERA (fixed vertical slots, no overlap) -->
-  <!-- Sapindaceae -->
-  <circle cx="700" cy="80" r="10" fill="#aaa"/>
-  <circle cx="700" cy="120" r="10" fill="#aaa"/>
-  <circle cx="700" cy="160" r="10" fill="#aaa"/>
-  <circle cx="700" cy="200" r="10" fill="#aaa"/>
-  <circle cx="700" cy="240" r="10" fill="#aaa"/>
-  <circle cx="700" cy="280" r="10" fill="#aaa"/>
-  <circle cx="700" cy="320" r="10" fill="#aaa"/>
-
-  <line x1="512" y1="120" x2="690" y2="80" stroke="#555"/>
-  <line x1="512" y1="120" x2="690" y2="120" stroke="#555"/>
-  <line x1="512" y1="120" x2="690" y2="160" stroke="#555"/>
-  <line x1="512" y1="120" x2="690" y2="200" stroke="#555"/>
-  <line x1="512" y1="120" x2="690" y2="240" stroke="#555"/>
-  <line x1="512" y1="120" x2="690" y2="280" stroke="#555"/>
-  <line x1="512" y1="120" x2="690" y2="320" stroke="#555"/>
-
-  <text x="700" y="70"  text-anchor="middle">Litchi</text>
-  <text x="700" y="110" text-anchor="middle">Nephelium</text>
-  <text x="700" y="150" text-anchor="middle">Dimocarpus</text>
-  <text x="700" y="190" text-anchor="middle">Melicoccus</text>
-  <text x="700" y="230" text-anchor="middle">Pometia</text>
-  <text x="700" y="270" text-anchor="middle">Blighia</text>
-  <text x="700" y="310" text-anchor="middle">Paullinia</text>
-
-  <!-- OTHER GENERA -->
-  <circle cx="700" cy="360" r="10" fill="#aaa"/>
-  <circle cx="700" cy="400" r="10" fill="#aaa"/>
-  <circle cx="700" cy="420" r="10" fill="#aaa"/>
-  <circle cx="700" cy="620" r="10" fill="#aaa"/>
-
-  <line x1="512" y1="200" x2="690" y2="360" stroke="#555"/>
-  <line x1="512" y1="200" x2="690" y2="400" stroke="#555"/>
-  <line x1="512" y1="420" x2="690" y2="420" stroke="#555"/>
-  <line x1="512" y1="620" x2="690" y2="620" stroke="#555"/>
-
-  <text x="700" y="350" text-anchor="middle">Acer</text>
-  <text x="700" y="390" text-anchor="middle">Aesculus</text>
-  <text x="700" y="410" text-anchor="middle">Garcinia</text>
-  <text x="700" y="610" text-anchor="middle">Annona</text>
-
-  <!-- SPECIES (one per row, no crossings) -->
-  <g font-size="12">
-    <line x1="710" y1="80"  x2="980" y2="80"  stroke="#555"/>
-    <line x1="710" y1="120" x2="980" y2="120" stroke="#555"/>
-    <line x1="710" y1="160" x2="980" y2="160" stroke="#555"/>
-    <line x1="710" y1="200" x2="980" y2="200" stroke="#555"/>
-    <line x1="710" y1="240" x2="980" y2="240" stroke="#555"/>
-    <line x1="710" y1="280" x2="980" y2="280" stroke="#555"/>
-    <line x1="710" y1="320" x2="980" y2="320" stroke="#555"/>
-    <line x1="710" y1="360" x2="980" y2="360" stroke="#555"/>
-    <line x1="710" y1="400" x2="980" y2="400" stroke="#555"/>
-    <line x1="710" y1="420" x2="980" y2="420" stroke="#555"/>
-    <line x1="710" y1="620" x2="980" y2="620" stroke="#555"/>
-
-    <text x="1000" y="84">Litchi chinensis — lychee / lichi</text>
-    <text x="1000" y="124">Nephelium lappaceum — rambutan / rambután</text>
-    <text x="1000" y="164">Nephelium mutabile — pulasan</text>
-    <text x="1000" y="204">Dimocarpus longan — longan</text>
-    <text x="1000" y="244">Melicoccus bijugatus — mamoncillo</text>
-    <text x="1000" y="284">Pometia pinnata — matoa / korlan</text>
-    <text x="1000" y="324">Blighia sapida — ackee</text>
-    <text x="1000" y="364">Acer spp. — maple / arce</text>
-    <text x="1000" y="404">Aesculus spp. — horse chestnut</text>
-    <text x="1000" y="424">Garcinia mangostana — mangosteen</text>
-    <text x="1000" y="624">Annona spp. — guanábana, chirimoya, atemoya</text>
-  </g>
-
-</svg>
 
 
 
