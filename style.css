@@ -127,3 +127,22 @@ table.dataframe th,
 table.dataframe td {
   border: none;               /* no internal grid */
 }
+
+table.dataframe {
+  border: 1px solid #d1d5db;   /* thin outer border */
+}
+
+table.dataframe th,
+table.dataframe td {
+  border: none;               /* no inner grid */
+}
+
+table.dataframe {
+  border: 1px solid #d1d5db;
+  border-collapse: collapse;
+}
+
+table.dataframe th,
+table.dataframe td {
+  border: none;
+}

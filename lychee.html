@@ -1,9 +1,5 @@
 <link rel="stylesheet" href="https://unpkg.com/phylotree@1.0.0/phylotree.css">
 
-<script src="https://d3js.org/d3.v3.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/phylotree@0.1.10/phylotree.js"></script>
-
-
 
 <main>
 
@@ -679,18 +675,21 @@ required to reach the lowest common ancestor (LCA).
   <div id="tree"></div>
 </div>
 
+<script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/veg/phylotree.js@0.1.10/phylotree.js"></script>
+
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
-  var newick = "(ZapoteNegro,(Jaboticaba,((Atemoya,(Soursop,SugarApple)),((Lansium,(HorseChestnut,(Maple,(Soapberry,(Guarana,(Ackee,(Matoa,(Mamoncillo,(Longan,(Lychee,(Rambutan,Pulasan))))))))))),(Gulupa,(Mangosteen,Bacuri))))));";
+  var newick =
+    "(ZapoteNegro,(Jaboticaba,((Atemoya,(Soursop,SugarApple)),((Lansium,(HorseChestnut,(Maple,(Soapberry,(Guarana,(Ackee,(Matoa,(Mamoncillo,(Longan,(Lychee,(Rambutan,Pulasan))))))))))),(Gulupa,(Mangosteen,Bacuri))))));";
 
-  var tree = new phylotree.phylotree(newick);
+  var tree = d3.layout.phylotree()
+    .svg(d3.select("#tree"))
+    .layout("left-to-right");
 
-  tree.render("#tree", {
-    layout: "left-to-right",
-    show_leaf_names: true,
-    show_branch_length: false
-  });
+  tree(newick);
 
 });
 </script>
