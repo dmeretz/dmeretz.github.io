@@ -103,3 +103,8 @@ tr:hover {
   overflow-x: auto;
   margin: 2rem 0;
 }
+
+.tree-wrapper {
+  border: none;
+  background: transparent;
+}

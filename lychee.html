@@ -1,6 +1,8 @@
+<link rel="stylesheet" href="https://unpkg.com/phylotree@1.0.0/phylotree.css">
+
 <main>
 
-<script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="https://d3js.org/d3.v5.min.js"></script>
 <script src="https://unpkg.com/phylotree@1.0.0/phylotree.js"></script>
 
 
@@ -97,7 +99,7 @@
   <li>
     <em>Garcinia mangostana</em> — Mangostino  
     [<a href="https://en.wikipedia.org/wiki/Mangosteen" target="_blank">Wikipedia</a>]  
-    [<a href="https://www.instagram.com/p/ByQb0fankxh/?igsh=MWQ0czhxcDR6MGhtYg==" target="_blank">Fruit Guy (IG)</a>]
+    [<a href="https://www.instagram.com/p/ByQb0fankxh/?igsh=MWQ0czhxcDR6MGhtYg==" target="_blank">frutas_colombianas (IG)</a>]
   </li>
   <li>
   <em>Platonia insignis</em> — bacurí  
@@ -117,17 +119,17 @@
   <li>
     <em>Annona muricata</em> — soursop  
     [<a href="https://en.wikipedia.org/wiki/Soursop" target="_blank">Wikipedia</a>]  
-    [<a href="https://www.instagram.com/explore/search/keyword/?q=soursop%20fruit%20fruit%20guy" target="_blank">Fruit Guy (IG)</a>]
+    [<a href="https://www.instagram.com/explore/search/keyword/?q=soursop%20fruit%20fruit%20guy" target="_blank">frutas_colombianas (IG)</a>]
   </li>
   <li>
     <em>Annona squamosa</em> — sugar apple  
     [<a href="https://en.wikipedia.org/wiki/Sugar-apple" target="_blank">Wikipedia</a>]  
-    [<a href="https://www.instagram.com/explore/search/keyword/?q=sugar%20apple%20fruit%20fruit%20guy" target="_blank">Fruit Guy (IG)</a>]
+    [<a href="https://www.instagram.com/explore/search/keyword/?q=sugar%20apple%20fruit%20fruit%20guy" target="_blank">frutas_colombianas (IG)</a>]
   </li>
   <li>
     <em>Annona</em> × <em>atemoya</em> — atemoya  
     [<a href="https://en.wikipedia.org/wiki/Atemoya" target="_blank">Wikipedia</a>]  
-    [<a href="https://www.instagram.com/p/BxNFrDeBNjw/?igsh=MWlqNmcxZW1qNXA1Zg==" target="_blank">Fruit Guy (IG)</a>]
+    [<a href="https://www.instagram.com/p/BxNFrDeBNjw/?igsh=MWlqNmcxZW1qNXA1Zg==" target="_blank">frutas_colombianas (IG)</a>]
   </li>
 </ul>
 
@@ -177,7 +179,7 @@ Distances are measured as the number of upward steps in the taxonomic hierarchy
 required to reach the lowest common ancestor (LCA).
 </p>
 
-<table border="1" class="dataframe">
+<table class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -676,16 +678,19 @@ required to reach the lowest common ancestor (LCA).
 </div>
 
 <script>
-  const newick = `(ZapoteNegro,(Jaboticaba,((Atemoya,(Soursop,SugarApple)),((Lansium,(HorseChestnut,(Maple,(Soapberry,(Guarana,(Ackee,(Matoa,(Mamoncillo,(Longan,(Lychee,(Rambutan,Pulasan))))))))))),(Gulupa,(Mangosteen,Bacuri))))));`;
+document.addEventListener("DOMContentLoaded", function () {
+  const newick =
+    "(ZapoteNegro,(Jaboticaba,((Atemoya,(Soursop,SugarApple)),((Lansium,(HorseChestnut,(Maple,(Soapberry,(Guarana,(Ackee,(Matoa,(Mamoncillo,(Longan,(Lychee,(Rambutan,Pulasan))))))))))),(Gulupa,(Mangosteen,Bacuri))))));";
 
   const tree = new phylotree.phylotree(newick);
+
   tree.render("#tree", {
     layout: "left-to-right",
     show_leaf_names: true,
     show_branch_length: false
   });
+});
 </script>
-
 
 
 
