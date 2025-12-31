@@ -108,3 +108,12 @@ tr:hover {
   border: none;
   background: transparent;
 }
+
+table.dataframe {
+  border: 1px solid #d1d5db; /* thin light gray outline */
+}
+
+table.dataframe th,
+table.dataframe td {
+  border: none;             /* no inner grid lines */
+}
