@@ -1,5 +1,19 @@
 <main>
 
+<script src="https://unpkg.com/d3@5"></script>
+<script src="https://unpkg.com/phylotree@1.0.0/phylotree.js"></script>
+
+<style>
+  #tree {
+    width: 100%;
+    height: 700px;
+    border: 1px solid #ddd;
+    margin-top: 1em;
+  }
+</style>
+
+
+
   <h1>Frutas como Litchi</h1>
 
   <p>
@@ -661,11 +675,20 @@ required to reach the lowest common ancestor (LCA).
 
   <hr>
 
-<h2>Taxonomic tree (Newick format)</h2>
+<h2>Taxonomic tree</h2>
 
-<pre class="newick-tree">
-(ZapoteNegro,(Jaboticaba,((Atemoya,(Soursop,SugarApple)),((Lansium,(HorseChestnut,(Maple,(Soapberry,(Guarana,(Ackee,(Matoa,(Mamoncillo,(Longan,(Lychee,(Rambutan,Pulasan))))))))))),(Gulupa,(Mangosteen,Bacuri))))));
-</pre>
+<div id="tree"></div>
+
+<script>
+  const newick = `(ZapoteNegro,(Jaboticaba,((Atemoya,(Soursop,SugarApple)),((Lansium,(HorseChestnut,(Maple,(Soapberry,(Guarana,(Ackee,(Matoa,(Mamoncillo,(Longan,(Lychee,(Rambutan,Pulasan))))))))))),(Gulupa,(Mangosteen,Bacuri))))));`;
+
+  const tree = new phylotree.phylotree(newick);
+  tree.render("#tree", {
+    layout: "left-to-right",
+    show_leaf_names: true,
+    show_branch_length: false
+  });
+</script>
 
 
 
