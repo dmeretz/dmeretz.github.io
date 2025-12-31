@@ -4,14 +4,7 @@
 <script src="https://unpkg.com/phylotree@1.0.0/phylotree.js"></script>
 
 
-<style>
-  #tree {
-    width: 100%;
-    height: 700px;
-    border: 1px solid #ddd;
-    margin-top: 1em;
-  }
-</style>
+
 
 
 
@@ -678,7 +671,9 @@ required to reach the lowest common ancestor (LCA).
 
 <h2>Taxonomic tree</h2>
 
-<div id="tree"></div>
+<div class="tree-wrapper">
+  <div id="tree"></div>
+</div>
 
 <script>
   const newick = `(ZapoteNegro,(Jaboticaba,((Atemoya,(Soursop,SugarApple)),((Lansium,(HorseChestnut,(Maple,(Soapberry,(Guarana,(Ackee,(Matoa,(Mamoncillo,(Longan,(Lychee,(Rambutan,Pulasan))))))))))),(Gulupa,(Mangosteen,Bacuri))))));`;
