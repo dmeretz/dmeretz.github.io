@@ -117,3 +117,13 @@ table.dataframe th,
 table.dataframe td {
   border: none;             /* no inner grid lines */
 }
+
+
+table.dataframe {
+  border: 1px solid #d1d5db;   /* thin outer border */
+}
+
+table.dataframe th,
+table.dataframe td {
+  border: none;               /* no internal grid */
+}
