@@ -95,7 +95,10 @@ tr:hover {
 #tree {
   width: 100%;
   height: 700px;
-  margin-top: 1.5rem;
+}
+
+svg#tree {
+  display: block;
 }
 
 .tree-wrapper {
@@ -135,6 +138,16 @@ table.dataframe {
 table.dataframe th,
 table.dataframe td {
   border: none;               /* no inner grid */
+}
+
+table.dataframe {
+  border: 1px solid #d1d5db;
+  border-collapse: collapse;
+}
+
+table.dataframe th,
+table.dataframe td {
+  border: none;
 }
 
 table.dataframe {
