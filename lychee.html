@@ -671,100 +671,93 @@ required to reach the lowest common ancestor (LCA).
 
 <h2>Taxonomic tree</h2>
 
-<div id="tree-wrapper">
-  <svg id="tree"></svg>
-</div>
+<script src="https://d3js.org/d3.v3.min.js"></script>
 
-<script src="https://d3js.org/d3.v7.min.js"></script>
 <script>
-// Parse Newick string into nested JSON
-function parseNewick(newick) {
-    let ancestors = [];
-    let tree = {};
-    let tokens = newick.split(/\s*(;|\(|\)|,|:)\s*/);
-    let current = tree;
-    for (let i=0; i<tokens.length; i++) {
-        let token = tokens[i];
-        switch(token) {
-            case '(': // start children
-                let child = {};
-                if (!current.children) current.children = [];
-                current.children.push(child);
-                ancestors.push(current);
-                current = child;
-                break;
-            case ',': // sibling
-                current = ancestors[ancestors.length-1];
-                let sibling = {};
-                current.children.push(sibling);
-                current = sibling;
-                break;
-            case ')': // end children
-                current = ancestors.pop();
-                break;
-            case ':': break; // ignore branch lengths
-            case ';': break; // end tree
-            default:
-                if (token.trim() !== '') current.name = token.trim();
-        }
-    }
-    return tree;
-}
+document.addEventListener("DOMContentLoaded", function () {
+    var width = 800, height = 700;
+    var svg = d3.select("#tree")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height);
 
-const newick = "(ZapoteNegro,(Jaboticaba,((Atemoya,(Soursop,SugarApple)),((Lansium,(HorseChestnut,(Maple,(Soapberry,(Guarana,(Ackee,(Matoa,(Mamoncillo,(Longan,(Lychee,(Rambutan,Pulasan))))))))))),(Gulupa,(Mangosteen,Bacuri))))));";
-const data = parseNewick(newick);
+    // Define manually the nodes
+    var nodes = [
+        {name: "ZapoteNegro", x: 700, y: 20},
+        {name: "Jaboticaba", x: 700, y: 60},
+        {name: "Atemoya", x: 550, y: 100},
+        {name: "Soursop", x: 700, y: 140},
+        {name: "SugarApple", x: 750, y: 140},
+        {name: "Lansium", x: 400, y: 180},
+        {name: "HorseChestnut", x: 500, y: 220},
+        {name: "Maple", x: 600, y: 260},
+        {name: "Soapberry", x: 650, y: 300},
+        {name: "Guarana", x: 700, y: 340},
+        {name: "Ackee", x: 750, y: 380},
+        {name: "Matoa", x: 800, y: 420},
+        {name: "Mamoncillo", x: 850, y: 460},
+        {name: "Longan", x: 900, y: 500},
+        {name: "Lychee", x: 950, y: 540},
+        {name: "Rambutan", x: 1000, y: 580},
+        {name: "Pulasan", x: 1050, y: 620},
+        {name: "Gulupa", x: 450, y: 400},
+        {name: "Mangosteen", x: 500, y: 440},
+        {name: "Bacuri", x: 550, y: 480}
+    ];
 
-// D3 tree layout
-const width = 960;
-const height = 700;
-const svg = d3.select("#tree")
-    .attr("viewBox", [0, 0, width, height])
-    .append("g")
-    .attr("transform", "translate(40,0)");
+    // Define links manually
+    var links = [
+        ["ZapoteNegro", "root"],
+        ["Jaboticaba", "root"],
+        ["Atemoya", "root"],
+        ["Soursop", "Atemoya"],
+        ["SugarApple", "Atemoya"],
+        ["Lansium", "root"],
+        ["HorseChestnut", "Lansium"],
+        ["Maple", "HorseChestnut"],
+        ["Soapberry", "Maple"],
+        ["Guarana", "Soapberry"],
+        ["Ackee", "Guarana"],
+        ["Matoa", "Ackee"],
+        ["Mamoncillo", "Matoa"],
+        ["Longan", "Mamoncillo"],
+        ["Lychee", "Longan"],
+        ["Rambutan", "Lychee"],
+        ["Pulasan", "Rambutan"],
+        ["Gulupa", "root"],
+        ["Mangosteen", "Gulupa"],
+        ["Bacuri", "Gulupa"]
+    ];
 
-const root = d3.hierarchy(data, d => d.children);
-const treeLayout = d3.tree().size([height - 20, width - 160]);
-treeLayout(root);
+    // Add lines
+    links.forEach(function(d){
+        var source = nodes.find(n => n.name === d[1]) || {x: 50, y: 350}; // root position
+        var target = nodes.find(n => n.name === d[0]);
+        svg.append("line")
+            .attr("x1", source.x)
+            .attr("y1", source.y)
+            .attr("x2", target.x)
+            .attr("y2", target.y)
+            .attr("stroke", "#333")
+            .attr("stroke-width", 2);
+    });
 
-// Draw links
-svg.selectAll('.link')
-    .data(root.links())
-    .enter()
-    .append('path')
-    .attr('class', 'link')
-    .attr('fill', 'none')
-    .attr('stroke', '#555')
-    .attr('stroke-width', 2)
-    .attr('d', d3.linkHorizontal()
-        .x(d => d.y)
-        .y(d => d.x)
-    );
-
-// Draw nodes
-const node = svg.selectAll('.node')
-    .data(root.descendants())
-    .enter()
-    .append('g')
-    .attr('class', 'node')
-    .attr('transform', d => `translate(${d.y},${d.x})`);
-
-node.append('circle')
-    .attr('r', 5)
-    .attr('fill', '#999')
-    .attr('stroke', 'steelblue')
-    .attr('stroke-width', 2);
-
-node.append('text')
-    .attr('dy', 3)
-    .attr('x', d => d.children ? -8 : 8)
-    .style('text-anchor', d => d.children ? 'end' : 'start')
-    .text(d => d.data.name);
+    // Add circles
+    nodes.forEach(function(d){
+        svg.append("circle")
+            .attr("cx", d.x)
+            .attr("cy", d.y)
+            .attr("r", 5)
+            .attr("fill", "#1f77b4");
+        svg.append("text")
+            .attr("x", d.x + 8)
+            .attr("y", d.y + 4)
+            .text(d.name)
+            .style("font-size", "12px")
+            .style("font-family", "sans-serif");
+    });
+});
 </script>
-
-<style>
-#tree-wrapper { max-width: 100%; overflow-x: auto; margin: 2rem 0; }
-</style>
-
 
 
 
