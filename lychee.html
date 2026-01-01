@@ -674,90 +674,89 @@ required to reach the lowest common ancestor (LCA).
 <script src="https://d3js.org/d3.v3.min.js"></script>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    var width = 800, height = 700;
-    var svg = d3.select("#tree")
-                .append("svg")
-                .attr("width", width)
-                .attr("height", height);
+var width = 800, height = 700;
+var svg = d3.select("#tree")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
 
-    // Define manually the nodes
-    var nodes = [
-        {name: "ZapoteNegro", x: 700, y: 20},
-        {name: "Jaboticaba", x: 700, y: 60},
-        {name: "Atemoya", x: 550, y: 100},
-        {name: "Soursop", x: 700, y: 140},
-        {name: "SugarApple", x: 750, y: 140},
-        {name: "Lansium", x: 400, y: 180},
-        {name: "HorseChestnut", x: 500, y: 220},
-        {name: "Maple", x: 600, y: 260},
-        {name: "Soapberry", x: 650, y: 300},
-        {name: "Guarana", x: 700, y: 340},
-        {name: "Ackee", x: 750, y: 380},
-        {name: "Matoa", x: 800, y: 420},
-        {name: "Mamoncillo", x: 850, y: 460},
-        {name: "Longan", x: 900, y: 500},
-        {name: "Lychee", x: 950, y: 540},
-        {name: "Rambutan", x: 1000, y: 580},
-        {name: "Pulasan", x: 1050, y: 620},
-        {name: "Gulupa", x: 450, y: 400},
-        {name: "Mangosteen", x: 500, y: 440},
-        {name: "Bacuri", x: 550, y: 480}
-    ];
+// manually define nodes
+var nodes = [
+    {name: "ZapoteNegro", x: 700, y: 20},
+    {name: "Jaboticaba", x: 700, y: 60},
+    {name: "Atemoya", x: 550, y: 100},
+    {name: "Soursop", x: 700, y: 140},
+    {name: "SugarApple", x: 750, y: 140},
+    {name: "Lansium", x: 400, y: 180},
+    {name: "HorseChestnut", x: 500, y: 220},
+    {name: "Maple", x: 600, y: 260},
+    {name: "Soapberry", x: 650, y: 300},
+    {name: "Guarana", x: 700, y: 340},
+    {name: "Ackee", x: 750, y: 380},
+    {name: "Matoa", x: 800, y: 420},
+    {name: "Mamoncillo", x: 850, y: 460},
+    {name: "Longan", x: 900, y: 500},
+    {name: "Lychee", x: 950, y: 540},
+    {name: "Rambutan", x: 1000, y: 580},
+    {name: "Pulasan", x: 1050, y: 620},
+    {name: "Gulupa", x: 450, y: 400},
+    {name: "Mangosteen", x: 500, y: 440},
+    {name: "Bacuri", x: 550, y: 480}
+];
 
-    // Define links manually
-    var links = [
-        ["ZapoteNegro", "root"],
-        ["Jaboticaba", "root"],
-        ["Atemoya", "root"],
-        ["Soursop", "Atemoya"],
-        ["SugarApple", "Atemoya"],
-        ["Lansium", "root"],
-        ["HorseChestnut", "Lansium"],
-        ["Maple", "HorseChestnut"],
-        ["Soapberry", "Maple"],
-        ["Guarana", "Soapberry"],
-        ["Ackee", "Guarana"],
-        ["Matoa", "Ackee"],
-        ["Mamoncillo", "Matoa"],
-        ["Longan", "Mamoncillo"],
-        ["Lychee", "Longan"],
-        ["Rambutan", "Lychee"],
-        ["Pulasan", "Rambutan"],
-        ["Gulupa", "root"],
-        ["Mangosteen", "Gulupa"],
-        ["Bacuri", "Gulupa"]
-    ];
+// define links
+var links = [
+    ["ZapoteNegro", "root"],
+    ["Jaboticaba", "root"],
+    ["Atemoya", "root"],
+    ["Soursop", "Atemoya"],
+    ["SugarApple", "Atemoya"],
+    ["Lansium", "root"],
+    ["HorseChestnut", "Lansium"],
+    ["Maple", "HorseChestnut"],
+    ["Soapberry", "Maple"],
+    ["Guarana", "Soapberry"],
+    ["Ackee", "Guarana"],
+    ["Matoa", "Ackee"],
+    ["Mamoncillo", "Matoa"],
+    ["Longan", "Mamoncillo"],
+    ["Lychee", "Longan"],
+    ["Rambutan", "Lychee"],
+    ["Pulasan", "Rambutan"],
+    ["Gulupa", "root"],
+    ["Mangosteen", "Gulupa"],
+    ["Bacuri", "Gulupa"]
+];
 
-    // Add lines
-    links.forEach(function(d){
-        var source = nodes.find(n => n.name === d[1]) || {x: 50, y: 350}; // root position
-        var target = nodes.find(n => n.name === d[0]);
-        svg.append("line")
-            .attr("x1", source.x)
-            .attr("y1", source.y)
-            .attr("x2", target.x)
-            .attr("y2", target.y)
-            .attr("stroke", "#333")
-            .attr("stroke-width", 2);
-    });
+// draw lines
+links.forEach(function(d){
+    var source = nodes.find(n => n.name === d[1]) || {x: 50, y: 350}; // root position
+    var target = nodes.find(n => n.name === d[0]);
+    svg.append("line")
+        .attr("x1", source.x)
+        .attr("y1", source.y)
+        .attr("x2", target.x)
+        .attr("y2", target.y)
+        .attr("stroke", "#333")
+        .attr("stroke-width", 2);
+});
 
-    // Add circles
-    nodes.forEach(function(d){
-        svg.append("circle")
-            .attr("cx", d.x)
-            .attr("cy", d.y)
-            .attr("r", 5)
-            .attr("fill", "#1f77b4");
-        svg.append("text")
-            .attr("x", d.x + 8)
-            .attr("y", d.y + 4)
-            .text(d.name)
-            .style("font-size", "12px")
-            .style("font-family", "sans-serif");
-    });
+// draw nodes
+nodes.forEach(function(d){
+    svg.append("circle")
+        .attr("cx", d.x)
+        .attr("cy", d.y)
+        .attr("r", 5)
+        .attr("fill", "#1f77b4");
+    svg.append("text")
+        .attr("x", d.x + 8)
+        .attr("y", d.y + 4)
+        .text(d.name)
+        .style("font-size", "12px")
+        .style("font-family", "sans-serif");
 });
 </script>
+
 
 
 
