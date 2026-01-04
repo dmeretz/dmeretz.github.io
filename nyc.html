@@ -2,14 +2,139 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Destruction of NYC</title>
-  <link rel="stylesheet" href="style.css">
+  <title>NYC Destruction Probability Calculator</title>
+
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.5;
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    input {
+      width: 100px;
+      margin-left: 8px;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 6px 12px;
+      font-size: 1em;
+    }
+
+    .box {
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin-top: 20px;
+      background: #fafafa;
+    }
+
+    .math {
+      font-family: monospace;
+      background: #f0f0f0;
+      padding: 4px 6px;
+      border-radius: 4px;
+    }
+  </style>
 </head>
+
 <body>
-  <main>
-    <h1>Destruction of NYC</h1>
-    <p>Content goes here.</p>
-    <p><a href="index.html">← Back to collection</a></p>
-  </main>
+
+<h1>NYC Destruction Probability Calculator</h1>
+
+<p>
+We model the number of times New York City is destroyed using a
+<strong>Poisson distribution</strong>.
+</p>
+
+<p>
+Assumption: NYC has been destroyed <strong>300 times</strong> in movies
+between <strong>1933 and 2025</strong> (92 years total).
+</p>
+
+<div class="box">
+  <label>
+    Number of days:
+    <input type="number" id="days" value="7" min="1">
+  </label>
+  <br><br>
+  <label>
+    Number of destruction events (k):
+    <input type="number" id="k" value="0" min="0">
+  </label>
+  <br>
+  <small>
+    (Set <strong>k = 0</strong> to compute the probability that NYC is not destroyed at all.)
+  </small>
+  <br><br>
+  <button onclick="compute()">Compute probability</button>
+</div>
+
+<div id="output" class="box" style="display:none;"></div>
+
+<script>
+function factorial(n) {
+  if (n === 0) return 1;
+  let result = 1;
+  for (let i = 1; i <= n; i++) result *= i;
+  return result;
+}
+
+function compute() {
+  const days = Number(document.getElementById("days").value);
+  const k = Number(document.getElementById("k").value);
+
+  // Step 1: rate per year
+  const destructions = 300;
+  const years = 92;
+  const lambdaPerYear = destructions / years;
+
+  // Step 2: convert to per day
+  const lambdaPerDay = lambdaPerYear / 365;
+
+  // Step 3: expected events over given days
+  const lambda = lambdaPerDay * days;
+
+  // Poisson probability
+  const probability =
+    Math.exp(-lambda) * Math.pow(lambda, k) / factorial(k);
+
+  const percent = (probability * 100).toFixed(2);
+
+  document.getElementById("output").style.display = "block";
+  document.getElementById("output").innerHTML = `
+    <h2>Result</h2>
+
+    <p><strong>Step 1.</strong> Average rate per year:</p>
+    <p class="math">λ<sub>year</sub> = 300 / 92 ≈ ${lambdaPerYear.toFixed(2)}</p>
+
+    <p><strong>Step 2.</strong> Convert to a daily rate:</p>
+    <p class="math">λ<sub>day</sub> = ${lambdaPerYear.toFixed(2)} / 365 ≈ ${lambdaPerDay.toExponential(3)}</p>
+
+    <p><strong>Step 3.</strong> Expected number of destructions over ${days} days:</p>
+    <p class="math">λ = λ<sub>day</sub> × ${days} ≈ ${lambda.toFixed(4)}</p>
+
+    <p><strong>Step 4.</strong> Poisson probability:</p>
+    <p class="math">
+      P(X = ${k}) = e<sup>−λ</sup> λ<sup>${k}</sup> / ${k}!
+    </p>
+
+    <p>
+      <strong>Probability:</strong> ${percent}%
+    </p>
+
+    ${
+      k === 0
+        ? "<p>This is the probability that NYC is <strong>not destroyed at all</strong> during this period.</p>"
+        : "<p>This is the probability that NYC is destroyed <strong>exactly " + k + " times</strong>.</p>"
+    }
+  `;
+}
+</script>
+
+<p><a href="index.html">← Back to collection</a></p>
+
 </body>
 </html>
