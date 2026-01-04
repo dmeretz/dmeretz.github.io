@@ -2,14 +2,85 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Maps</title>
+  <title>Maps — Bogotá & NYC</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    main {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    h1, h2 {
+      margin-top: 2rem;
+    }
+
+    iframe {
+      width: 100%;
+      height: 600px;
+      border: 1px solid #ccc;
+      margin-top: 1rem;
+    }
+
+    .map-note {
+      font-size: 0.9em;
+      color: #555;
+    }
+  </style>
 </head>
+
 <body>
   <main>
     <h1>Maps</h1>
-    <p>Content goes here.</p>
-    <p><a href="index.html">← Back to collection</a></p>
+
+    <p>
+      A small collection of useful maps for Bogotá and New York City.
+    </p>
+
+    <hr>
+
+    <h2>Bogotá</h2>
+
+    <iframe
+      src="https://www.openstreetmap.org/export/embed.html?bbox=-74.223%2C4.470%2C-74.004%2C4.836&layer=mapnik"
+      loading="lazy">
+    </iframe>
+
+    <p class="map-note">
+      Interactive OpenStreetMap view of Bogotá.
+    </p>
+
+    <hr>
+
+    <h2>New York City — Subway Map</h2>
+
+    <iframe
+      src="https://new.mta.info/map/5256"
+      loading="lazy">
+    </iframe>
+
+    <p class="map-note">
+      Official MTA subway map.
+    </p>
+
+    <hr>
+
+    <h2>New York City — Bike Map</h2>
+
+    <iframe
+      src="https://www.nyc.gov/site/dot/infrastructure/bicycle-network-map.page"
+      loading="lazy">
+    </iframe>
+
+    <p class="map-note">
+      NYC Department of Transportation bicycle network map.
+    </p>
+
+    <hr>
+
+    <p>
+      <a href="index.html">← Back to collection</a>
+    </p>
   </main>
 </body>
 </html>
