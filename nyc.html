@@ -51,40 +51,43 @@
 <h1>NYC Destruction Probability Calculator</h1>
 
 <p>
-We model the number of times New York City is destroyed using a
-<strong>Poisson distribution</strong>.
+We model fictional destructions of New York City using a <strong>Poisson process</strong>.
+This assumes destruction events occur independently at a constant average rate.
 </p>
 
 <p>
-Assumption: NYC has been destroyed <strong>300 times</strong> in movies
-between <strong>1933 and 2025</strong> (92 years total).
+Based on approximately <strong>300 movies</strong> depicting NYC destruction between
+<strong>1933–2025 (92 years)</strong>, we estimate:
 </p>
 
-<div class="box">
-  <label>
-    Number of days:
-    <input type="number" id="days" value="7" min="1">
-  </label>
+<ul>
+  <li>Average rate per year: <strong>300 / 92 ≈ 3.26</strong></li>
+  <li>Average rate per day: <strong>3.26 / 365 ≈ 0.00893</strong></li>
+</ul>
 
-  <label>
-    Number of destruction events (k):
-    <input type="number" id="k" value="0" min="0">
-  </label>
+<hr>
 
-  <label>
-    <input type="checkbox" id="cumulative">
-    Compute cumulative probability (P(X ≤ k))
-  </label>
+<h2>Calculator</h2>
 
-  <small>
-    If k = 0, this gives the probability that NYC is not destroyed at all.
-  </small>
+<label>
+  Number of days (<em>t</em>):<br>
+  <input type="number" id="days" value="7" min="0" step="1">
+</label>
 
-  <br>
-  <button onclick="compute()">Compute probability</button>
-</div>
+<br><br>
 
-<div id="output" class="box" style="display:none;"></div>
+<label>
+  Number of destruction events (<em>k</em>):<br>
+  <input type="number" id="k" value="0" min="0" step="1">
+</label>
+
+<br><br>
+
+<button onclick="compute()">Compute probability</button>
+
+<hr>
+
+<div id="output"></div>
 
 <script>
 function factorial(n) {
@@ -94,86 +97,82 @@ function factorial(n) {
   return result;
 }
 
-function poissonPMF(lambda, k) {
-  return Math.exp(-lambda) * Math.pow(lambda, k) / factorial(k);
-}
-
 function compute() {
   const days = Number(document.getElementById("days").value);
   const k = Number(document.getElementById("k").value);
-  const cumulative = document.getElementById("cumulative").checked;
 
-  // Base assumptions
-  const destructions = 300;
-  const years = 92;
+  const ratePerYear = 300 / 92;
+  const ratePerDay = ratePerYear / 365;
 
-  // Rates
-  const lambdaPerYear = destructions / years;
-  const lambdaPerDay = lambdaPerYear / 365;
-  const lambda = lambdaPerDay * days;
+  const lambda = ratePerDay * days;
 
-  let probability;
-  let explanation;
+  const pExact =
+    Math.exp(-lambda) * Math.pow(lambda, k) / factorial(k);
 
-  if (cumulative) {
-    probability = 0;
-    for (let i = 0; i <= k; i++) {
-      probability += poissonPMF(lambda, i);
-    }
-    explanation = `
+  let html = `
+    <h3>Explanation</h3>
+
+    <p>
+    We model the number of NYC destructions as a Poisson random variable.
+    </p>
+
+    <p>
+    The Poisson formula gives the probability of observing exactly
+    <strong>k events</strong> in a time interval of length <strong>t</strong>:
+    </p>
+
+    <p style="text-align:center;">
+      <strong>P(k events in interval t) = (λ<sup>k</sup> e<sup>−λ</sup>) / k!</strong>
+    </p>
+
+    <p>
+    where <strong>λ = r × t</strong>, with <em>r</em> the average rate of events per day.
+    </p>
+
+    <hr>
+
+    <p>
+    Using:
+    </p>
+
+    <ul>
+      <li>Rate per day: <strong>${ratePerDay.toFixed(5)}</strong></li>
+      <li>Days (t): <strong>${days}</strong></li>
+      <li>λ = r × t = <strong>${lambda.toFixed(4)}</strong></li>
+    </ul>
+
+    <p>
+    The probability of observing <strong>exactly ${k}</strong> destruction event(s) is:
+    </p>
+
+    <p style="font-size:1.2em;">
+      <strong>${(pExact * 100).toFixed(2)}%</strong>
+    </p>
+  `;
+
+  if (k === 0) {
+    const pAtLeastOne = 1 - Math.exp(-lambda);
+    html += `
+      <hr>
       <p>
-        We compute the cumulative probability:
+      Since <strong>k = 0</strong>, this also lets us compute the probability that
+      NYC is destroyed <strong>at least once</strong> during this time period:
       </p>
-      <p class="math">
-        P(X ≤ ${k}) = Σ<sub>i=0</sub><sup>${k}</sup> e<sup>−λ</sup> λ<sup>i</sup> / i!
+
+      <p style="text-align:center;">
+        <strong>1 − P(0) = 1 − e<sup>−λ</sup></strong>
       </p>
-    `;
-  } else {
-    probability = poissonPMF(lambda, k);
-    explanation = `
-      <p>
-        We compute the exact probability:
-      </p>
-      <p class="math">
-        P(X = ${k}) = e<sup>−λ</sup> λ<sup>${k}</sup> / ${k}!
+
+      <p style="font-size:1.2em;">
+        <strong>${(pAtLeastOne * 100).toFixed(2)}%</strong>
       </p>
     `;
   }
 
-  const percent = (probability * 100).toFixed(2);
-
-  document.getElementById("output").style.display = "block";
-  document.getElementById("output").innerHTML = `
-    <h2>Result</h2>
-
-    <p><strong>Step 1.</strong> Average destruction rate per year:</p>
-    <p class="math">λ<sub>year</sub> = 300 / 92 ≈ ${lambdaPerYear.toFixed(2)}</p>
-
-    <p><strong>Step 2.</strong> Convert to daily rate:</p>
-    <p class="math">
-      λ<sub>day</sub> = ${lambdaPerYear.toFixed(2)} / 365 ≈ ${lambdaPerDay.toExponential(3)}
-    </p>
-
-    <p><strong>Step 3.</strong> Expected destructions over ${days} days:</p>
-    <p class="math">λ = λ<sub>day</sub> × ${days} ≈ ${lambda.toFixed(4)}</p>
-
-    <p><strong>Step 4.</strong></p>
-    ${explanation}
-
-    <p>
-      <strong>Probability:</strong> ${percent}%
-    </p>
-
-    ${
-      cumulative
-        ? `<p>This is the probability that NYC is destroyed <strong>at most ${k} times</strong>.</p>`
-        : k === 0
-          ? `<p>This is the probability that NYC is <strong>not destroyed at all</strong>.</p>`
-          : `<p>This is the probability that NYC is destroyed <strong>exactly ${k} times</strong>.</p>`
-    }
-  `;
+  document.getElementById("output").innerHTML = html;
 }
 </script>
+
 
 <p><a href="index.html">← Back to collection</a></p>
 
