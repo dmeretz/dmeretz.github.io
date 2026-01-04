@@ -8,7 +8,7 @@
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       line-height: 1.5;
-      max-width: 700px;
+      max-width: 720px;
       margin: 40px auto;
       padding: 0 20px;
     }
@@ -36,6 +36,12 @@
       background: #f0f0f0;
       padding: 4px 6px;
       border-radius: 4px;
+      display: inline-block;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -59,16 +65,22 @@ between <strong>1933 and 2025</strong> (92 years total).
     Number of days:
     <input type="number" id="days" value="7" min="1">
   </label>
-  <br><br>
+
   <label>
     Number of destruction events (k):
     <input type="number" id="k" value="0" min="0">
   </label>
-  <br>
+
+  <label>
+    <input type="checkbox" id="cumulative">
+    Compute cumulative probability (P(X ≤ k))
+  </label>
+
   <small>
-    (Set <strong>k = 0</strong> to compute the probability that NYC is not destroyed at all.)
+    If k = 0, this gives the probability that NYC is not destroyed at all.
   </small>
-  <br><br>
+
+  <br>
   <button onclick="compute()">Compute probability</button>
 </div>
 
@@ -82,24 +94,51 @@ function factorial(n) {
   return result;
 }
 
+function poissonPMF(lambda, k) {
+  return Math.exp(-lambda) * Math.pow(lambda, k) / factorial(k);
+}
+
 function compute() {
   const days = Number(document.getElementById("days").value);
   const k = Number(document.getElementById("k").value);
+  const cumulative = document.getElementById("cumulative").checked;
 
-  // Step 1: rate per year
+  // Base assumptions
   const destructions = 300;
   const years = 92;
+
+  // Rates
   const lambdaPerYear = destructions / years;
-
-  // Step 2: convert to per day
   const lambdaPerDay = lambdaPerYear / 365;
-
-  // Step 3: expected events over given days
   const lambda = lambdaPerDay * days;
 
-  // Poisson probability
-  const probability =
-    Math.exp(-lambda) * Math.pow(lambda, k) / factorial(k);
+  let probability;
+  let explanation;
+
+  if (cumulative) {
+    probability = 0;
+    for (let i = 0; i <= k; i++) {
+      probability += poissonPMF(lambda, i);
+    }
+    explanation = `
+      <p>
+        We compute the cumulative probability:
+      </p>
+      <p class="math">
+        P(X ≤ ${k}) = Σ<sub>i=0</sub><sup>${k}</sup> e<sup>−λ</sup> λ<sup>i</sup> / i!
+      </p>
+    `;
+  } else {
+    probability = poissonPMF(lambda, k);
+    explanation = `
+      <p>
+        We compute the exact probability:
+      </p>
+      <p class="math">
+        P(X = ${k}) = e<sup>−λ</sup> λ<sup>${k}</sup> / ${k}!
+      </p>
+    `;
+  }
 
   const percent = (probability * 100).toFixed(2);
 
@@ -107,28 +146,30 @@ function compute() {
   document.getElementById("output").innerHTML = `
     <h2>Result</h2>
 
-    <p><strong>Step 1.</strong> Average rate per year:</p>
+    <p><strong>Step 1.</strong> Average destruction rate per year:</p>
     <p class="math">λ<sub>year</sub> = 300 / 92 ≈ ${lambdaPerYear.toFixed(2)}</p>
 
-    <p><strong>Step 2.</strong> Convert to a daily rate:</p>
-    <p class="math">λ<sub>day</sub> = ${lambdaPerYear.toFixed(2)} / 365 ≈ ${lambdaPerDay.toExponential(3)}</p>
+    <p><strong>Step 2.</strong> Convert to daily rate:</p>
+    <p class="math">
+      λ<sub>day</sub> = ${lambdaPerYear.toFixed(2)} / 365 ≈ ${lambdaPerDay.toExponential(3)}
+    </p>
 
-    <p><strong>Step 3.</strong> Expected number of destructions over ${days} days:</p>
+    <p><strong>Step 3.</strong> Expected destructions over ${days} days:</p>
     <p class="math">λ = λ<sub>day</sub> × ${days} ≈ ${lambda.toFixed(4)}</p>
 
-    <p><strong>Step 4.</strong> Poisson probability:</p>
-    <p class="math">
-      P(X = ${k}) = e<sup>−λ</sup> λ<sup>${k}</sup> / ${k}!
-    </p>
+    <p><strong>Step 4.</strong></p>
+    ${explanation}
 
     <p>
       <strong>Probability:</strong> ${percent}%
     </p>
 
     ${
-      k === 0
-        ? "<p>This is the probability that NYC is <strong>not destroyed at all</strong> during this period.</p>"
-        : "<p>This is the probability that NYC is destroyed <strong>exactly " + k + " times</strong>.</p>"
+      cumulative
+        ? `<p>This is the probability that NYC is destroyed <strong>at most ${k} times</strong>.</p>`
+        : k === 0
+          ? `<p>This is the probability that NYC is <strong>not destroyed at all</strong>.</p>`
+          : `<p>This is the probability that NYC is destroyed <strong>exactly ${k} times</strong>.</p>`
     }
   `;
 }
