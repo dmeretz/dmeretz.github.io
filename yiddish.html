@@ -1,15 +1,19 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mars Position</title>
+
+    <title>Mars — Simple Kepler Model</title>
 
     <style>
         body {
             font-family: sans-serif;
+            max-width: 700px;
+            margin: 60px auto;
+            padding: 20px;
             text-align: center;
-            margin-top: 100px;
         }
 
         button {
@@ -20,7 +24,13 @@
 
         #result {
             margin-top: 30px;
-            font-size: 1.3em;
+            font-size: 1.2em;
+            line-height: 1.8;
+        }
+
+        canvas {
+            margin-top: 30px;
+            border: 1px solid #ccc;
         }
     </style>
 </head>
@@ -29,84 +39,494 @@
 
     <h1>Mars Position</h1>
 
-    <button onclick="getMarsPosition()">
-        Get Mars Position
+    <p>
+        A simple 2D Keplerian model of the Solar System.
+    </p>
+
+    <button onclick="calculateMars()">
+        Calculate Mars Position
     </button>
 
-    <div id="result">
-        Click the button.
-    </div>
+    <div id="result"></div>
 
-    <script>
-        async function getMarsPosition() {
+    <canvas id="orbitCanvas" width="500" height="500"></canvas>
 
-            const result = document.getElementById("result");
 
-            result.innerHTML = "Loading...";
+<script>
 
-            // Current time in UTC
-            const now = new Date();
+/*
+===========================================================
+    SIMPLE 2D KEPLERIAN SOLAR SYSTEM
+===========================================================
 
-            // Horizons wants a start and stop time.
-            // We give it a one-minute interval.
-            const start = now.toISOString().slice(0, 19);
-            const stop = new Date(now.getTime() + 60000)
-                .toISOString()
-                .slice(0, 19);
+Units:
+    distance = AU
+    time     = days
+    angles   = radians
 
-            const params = new URLSearchParams({
-                format: "json",
-                COMMAND: "'499'",          // Mars
-                OBJ_DATA: "NO",
-                MAKE_EPHEM: "YES",
-                EPHEM_TYPE: "OBSERVER",
+We model the Sun, Earth, and Mars as two-body Kepler
+orbits.
 
-                // Geocentric observer
-                CENTER: "'500@399'",
+The model is intentionally simple.
+===========================================================
+*/
 
-                START_TIME: `'${start}'`,
-                STOP_TIME: `'${stop}'`,
-                STEP_SIZE: "'1m'",
 
-                // Quantity 1 = astrometric RA/DEC
-                QUANTITIES: "'1'",
+// ---------------------------------------------------------
+// CONSTANTS
+// ---------------------------------------------------------
 
-                ANG_FORMAT: "'DEG'"
-            });
+const PI = Math.PI;
+const TWO_PI = 2 * PI;
 
-            const url =
-                "https://ssd.jpl.nasa.gov/api/horizons.api?" +
-                params.toString();
 
-            try {
+// ---------------------------------------------------------
+// ORBITAL PARAMETERS
+// ---------------------------------------------------------
 
-                const response = await fetch(url);
+// Earth
+const Earth = {
+    a: 1.000000,          // semi-major axis (AU)
+    e: 0.0167,            // eccentricity
+    period: 365.256,      // orbital period (days)
 
-                if (!response.ok) {
-                    throw new Error(
-                        `HTTP error ${response.status}`
-                    );
-                }
+    // Approximate mean anomaly at J2000
+    M0: -0.043
+};
 
-                const data = await response.json();
 
-                console.log(data);
+// Mars
+const Mars = {
+    a: 1.523679,          // semi-major axis (AU)
+    e: 0.0934,            // eccentricity
+    period: 686.980,      // orbital period (days)
 
-                // Horizons puts its actual ephemeris output
-                // in the "result" field.
-                result.innerHTML =
-                    "<pre>" + data.result + "</pre>";
+    // Approximate mean anomaly at J2000
+    M0: 0.524
+};
 
-            } catch (error) {
 
-                console.error(error);
+// J2000 epoch
+// 2000 January 1, 12:00 UTC
+const J2000 = new Date("2000-01-01T12:00:00Z");
 
-                result.innerHTML =
-                    "Could not contact the Horizons API.<br><br>" +
-                    error;
-            }
-        }
-    </script>
+
+// ---------------------------------------------------------
+// UTILITY FUNCTIONS
+// ---------------------------------------------------------
+
+function normalizeAngle(x) {
+
+    x = x % TWO_PI;
+
+    if (x < 0)
+        x += TWO_PI;
+
+    return x;
+}
+
+
+function daysSinceJ2000(date) {
+
+    return (date - J2000) / (1000 * 60 * 60 * 24);
+
+}
+
+
+// ---------------------------------------------------------
+// KEPLER'S EQUATION
+// ---------------------------------------------------------
+
+/*
+
+Mean anomaly:
+
+        M = n t + M0
+
+where
+
+        n = 2π / T
+
+Kepler's equation:
+
+        M = E - e sin(E)
+
+We solve this using Newton's method.
+
+*/
+
+
+function solveKepler(M, e) {
+
+    M = normalizeAngle(M);
+
+    // Initial guess
+    let E = M;
+
+    // Newton iteration
+    for (let i = 0; i < 20; i++) {
+
+        let f = E - e * Math.sin(E) - M;
+
+        let fp = 1 - e * Math.cos(E);
+
+        let correction = f / fp;
+
+        E = E - correction;
+
+        if (Math.abs(correction) < 1e-10)
+            break;
+    }
+
+    return E;
+}
+
+
+// ---------------------------------------------------------
+// PLANET POSITION
+// ---------------------------------------------------------
+
+/*
+
+For an ellipse with the Sun at one focus:
+
+        x = a(cos(E) - e)
+
+        y = a sqrt(1-e²) sin(E)
+
+*/
+
+function planetPosition(planet, date) {
+
+    const t = daysSinceJ2000(date);
+
+    const n = TWO_PI / planet.period;
+
+    const M = planet.M0 + n * t;
+
+    const E = solveKepler(M, planet.e);
+
+    const x =
+        planet.a * (Math.cos(E) - planet.e);
+
+    const y =
+        planet.a *
+        Math.sqrt(1 - planet.e * planet.e) *
+        Math.sin(E);
+
+    return {
+        x: x,
+        y: y
+    };
+}
+
+
+// ---------------------------------------------------------
+// ANGLE CONVERSION
+// ---------------------------------------------------------
+
+function radiansToDegrees(x) {
+    return x * 180 / PI;
+}
+
+
+function degreesToHours(deg) {
+    return deg / 15;
+}
+
+
+function formatRA(hours) {
+
+    hours = (hours + 24) % 24;
+
+    const h = Math.floor(hours);
+
+    const minutesDecimal =
+        (hours - h) * 60;
+
+    const m = Math.floor(minutesDecimal);
+
+    const seconds =
+        (minutesDecimal - m) * 60;
+
+    return (
+        h + "h " +
+        m + "m " +
+        seconds.toFixed(1) + "s"
+    );
+}
+
+
+// ---------------------------------------------------------
+// MAIN CALCULATION
+// ---------------------------------------------------------
+
+function calculateMars() {
+
+    const now = new Date();
+
+    // Heliocentric positions
+    const earth =
+        planetPosition(Earth, now);
+
+    const mars =
+        planetPosition(Mars, now);
+
+
+    // -----------------------------------------------------
+    // GEOCENTRIC POSITION
+    // -----------------------------------------------------
+
+    // Mars relative to Earth
+
+    const x =
+        mars.x - earth.x;
+
+    const y =
+        mars.y - earth.y;
+
+
+    // Distance from Earth
+    const distance =
+        Math.sqrt(x*x + y*y);
+
+
+    // -----------------------------------------------------
+    // GEOCENTRIC LONGITUDE
+    // -----------------------------------------------------
+
+    let longitude =
+        Math.atan2(y, x);
+
+    longitude =
+        normalizeAngle(longitude);
+
+
+    const longitudeDegrees =
+        radiansToDegrees(longitude);
+
+
+    /*
+    In this 2D model we don't yet have a celestial
+    equator, so we simply take:
+
+        declination = 0
+
+    The longitude is effectively the angular position
+    of Mars relative to the Sun/Earth geometry.
+    */
+
+
+    // Convert ecliptic longitude to a pseudo-RA
+    const RA_hours =
+        degreesToHours(longitudeDegrees);
+
+
+    // -----------------------------------------------------
+    // DISPLAY
+    // -----------------------------------------------------
+
+    document.getElementById("result").innerHTML =
+
+        "<strong>Current time:</strong><br>" +
+        now.toUTCString() +
+        "<br><br>" +
+
+        "<strong>Mars</strong><br>" +
+
+        "RA (2D approximation): " +
+        formatRA(RA_hours) +
+        "<br>" +
+
+        "Ecliptic longitude: " +
+        longitudeDegrees.toFixed(3) +
+        "°" +
+        "<br>" +
+
+        "Distance from Earth: " +
+        distance.toFixed(4) +
+        " AU";
+
+
+    // Draw the Solar System
+    drawOrbit(earth, mars);
+}
+
+
+// ---------------------------------------------------------
+// DRAW THE SOLAR SYSTEM
+// ---------------------------------------------------------
+
+function drawOrbit(earth, mars) {
+
+    const canvas =
+        document.getElementById("orbitCanvas");
+
+    const ctx =
+        canvas.getContext("2d");
+
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+
+    const centerX =
+        canvas.width / 2;
+
+    const centerY =
+        canvas.height / 2;
+
+
+    // Scale:
+    // Mars orbit is about 1.52 AU
+    const scale = 140;
+
+
+    function screenX(x) {
+        return centerX + scale * x;
+    }
+
+    function screenY(y) {
+        return centerY - scale * y;
+    }
+
+
+    // -----------------------------------------------------
+    // Sun
+    // -----------------------------------------------------
+
+    ctx.beginPath();
+
+    ctx.arc(
+        centerX,
+        centerY,
+        7,
+        0,
+        TWO_PI
+    );
+
+    ctx.fill();
+
+
+    // -----------------------------------------------------
+    // Earth orbit
+    // -----------------------------------------------------
+
+    ctx.beginPath();
+
+    for (let theta = 0; theta <= TWO_PI; theta += 0.01) {
+
+        const x =
+            Earth.a * Math.cos(theta);
+
+        const y =
+            Earth.a * Math.sin(theta);
+
+        if (theta === 0)
+            ctx.moveTo(
+                screenX(x),
+                screenY(y)
+            );
+        else
+            ctx.lineTo(
+                screenX(x),
+                screenY(y)
+            );
+    }
+
+    ctx.stroke();
+
+
+    // -----------------------------------------------------
+    // Mars orbit
+    // -----------------------------------------------------
+
+    ctx.beginPath();
+
+    for (let theta = 0; theta <= TWO_PI; theta += 0.01) {
+
+        const x =
+            Mars.a * Math.cos(theta);
+
+        const y =
+            Mars.a * Math.sin(theta);
+
+        if (theta === 0)
+            ctx.moveTo(
+                screenX(x),
+                screenY(y)
+            );
+        else
+            ctx.lineTo(
+                screenX(x),
+                screenY(y)
+            );
+    }
+
+    ctx.stroke();
+
+
+    // -----------------------------------------------------
+    // Earth
+    // -----------------------------------------------------
+
+    ctx.beginPath();
+
+    ctx.arc(
+        screenX(earth.x),
+        screenY(earth.y),
+        5,
+        0,
+        TWO_PI
+    );
+
+    ctx.fill();
+
+
+    // -----------------------------------------------------
+    // Mars
+    // -----------------------------------------------------
+
+    ctx.beginPath();
+
+    ctx.arc(
+        screenX(mars.x),
+        screenY(mars.y),
+        5,
+        0,
+        TWO_PI
+    );
+
+    ctx.fill();
+
+
+    // -----------------------------------------------------
+    // Labels
+    // -----------------------------------------------------
+
+    ctx.fillText(
+        "Sun",
+        centerX + 10,
+        centerY
+    );
+
+    ctx.fillText(
+        "Earth",
+        screenX(earth.x) + 8,
+        screenY(earth.y)
+    );
+
+    ctx.fillText(
+        "Mars",
+        screenX(mars.x) + 8,
+        screenY(mars.y)
+    );
+}
+
+</script>
 
 </body>
 </html>
