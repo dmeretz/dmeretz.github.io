@@ -1,15 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Yiddish Words</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mars Position</title>
+
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        button {
+            font-size: 1.1em;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        #result {
+            margin-top: 30px;
+            font-size: 1.3em;
+        }
+    </style>
 </head>
+
 <body>
-  <main>
-    <h1>Yiddish Words</h1>
-    <p>Content goes here.</p>
-    <p><a href="index.html">← Back to collection</a></p>
-  </main>
+
+    <h1>Mars Position</h1>
+
+    <button onclick="getMarsPosition()">
+        Get Mars Position
+    </button>
+
+    <div id="result">
+        Click the button.
+    </div>
+
+    <script>
+        async function getMarsPosition() {
+
+            const result = document.getElementById("result");
+
+            result.innerHTML = "Loading...";
+
+            // Current time in UTC
+            const now = new Date();
+
+            // Horizons wants a start and stop time.
+            // We give it a one-minute interval.
+            const start = now.toISOString().slice(0, 19);
+            const stop = new Date(now.getTime() + 60000)
+                .toISOString()
+                .slice(0, 19);
+
+            const params = new URLSearchParams({
+                format: "json",
+                COMMAND: "'499'",          // Mars
+                OBJ_DATA: "NO",
+                MAKE_EPHEM: "YES",
+                EPHEM_TYPE: "OBSERVER",
+
+                // Geocentric observer
+                CENTER: "'500@399'",
+
+                START_TIME: `'${start}'`,
+                STOP_TIME: `'${stop}'`,
+                STEP_SIZE: "'1m'",
+
+                // Quantity 1 = astrometric RA/DEC
+                QUANTITIES: "'1'",
+
+                ANG_FORMAT: "'DEG'"
+            });
+
+            const url =
+                "https://ssd.jpl.nasa.gov/api/horizons.api?" +
+                params.toString();
+
+            try {
+
+                const response = await fetch(url);
+
+                if (!response.ok) {
+                    throw new Error(
+                        `HTTP error ${response.status}`
+                    );
+                }
+
+                const data = await response.json();
+
+                console.log(data);
+
+                // Horizons puts its actual ephemeris output
+                // in the "result" field.
+                result.innerHTML =
+                    "<pre>" + data.result + "</pre>";
+
+            } catch (error) {
+
+                console.error(error);
+
+                result.innerHTML =
+                    "Could not contact the Horizons API.<br><br>" +
+                    error;
+            }
+        }
+    </script>
+
 </body>
 </html>
