@@ -2,531 +2,513 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>Simple Mars Ephemeris</title>
 
-    <title>Mars — Simple Kepler Model</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
 
-    <style>
-        body {
-            font-family: sans-serif;
-            max-width: 700px;
-            margin: 60px auto;
-            padding: 20px;
-            text-align: center;
-        }
+    button {
+      font-size: 18px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
 
-        button {
-            font-size: 1.1em;
-            padding: 10px 20px;
-            cursor: pointer;
-        }
+    #output {
+      margin-top: 20px;
+      font-size: 20px;
+    }
 
-        #result {
-            margin-top: 30px;
-            font-size: 1.2em;
-            line-height: 1.8;
-        }
+    canvas {
+      display: block;
+      margin-top: 30px;
+      border: 1px solid #ccc;
+    }
 
-        canvas {
-            margin-top: 30px;
-            border: 1px solid #ccc;
-        }
-    </style>
+    .equation {
+      font-family: serif;
+      font-size: 19px;
+      margin: 15px 0;
+    }
+  </style>
 </head>
 
 <body>
 
-    <h1>Mars Position</h1>
+<h1>Where is Mars?</h1>
 
-    <p>
-        A simple 2D Keplerian model of the Solar System.
-    </p>
+<p>
+  This page computes an approximate position of Mars using
+  Kepler's laws and a simple two-dimensional model of the solar system.
+</p>
 
-    <button onclick="calculateMars()">
-        Calculate Mars Position
-    </button>
+<button onclick="calculateMars()">Calculate Mars</button>
 
-    <div id="result"></div>
+<div id="output"></div>
 
-    <canvas id="orbitCanvas" width="500" height="500"></canvas>
+<canvas id="sky" width="600" height="600"></canvas>
 
 
 <script>
 
-/*
-===========================================================
-    SIMPLE 2D KEPLERIAN SOLAR SYSTEM
-===========================================================
-
-Units:
-    distance = AU
-    time     = days
-    angles   = radians
-
-We model the Sun, Earth, and Mars as two-body Kepler
-orbits.
-
-The model is intentionally simple.
-===========================================================
-*/
-
-
-// ---------------------------------------------------------
-// CONSTANTS
-// ---------------------------------------------------------
-
-const PI = Math.PI;
-const TWO_PI = 2 * PI;
-
-
-// ---------------------------------------------------------
-// ORBITAL PARAMETERS
-// ---------------------------------------------------------
-
-// Earth
-const Earth = {
-    a: 1.000000,          // semi-major axis (AU)
-    e: 0.0167,            // eccentricity
-    period: 365.256,      // orbital period (days)
-
-    // Approximate mean anomaly at J2000
-    M0: -0.043
-};
-
-
-// Mars
-const Mars = {
-    a: 1.523679,          // semi-major axis (AU)
-    e: 0.0934,            // eccentricity
-    period: 686.980,      // orbital period (days)
-
-    // Approximate mean anomaly at J2000
-    M0: 0.524
-};
-
+/************************************************************
+ * CONSTANTS
+ ************************************************************/
 
 // J2000 epoch
-// 2000 January 1, 12:00 UTC
 const J2000 = new Date("2000-01-01T12:00:00Z");
 
+// Earth's orbital parameters
+const Earth = {
+  a: 1.000000,       // AU
+  e: 0.0167,
+  period: 365.256,   // days
 
-// ---------------------------------------------------------
-// UTILITY FUNCTIONS
-// ---------------------------------------------------------
+  // Approximate mean anomaly at J2000
+  M0: -0.043
+};
 
-function normalizeAngle(x) {
+// Mars' orbital parameters
+const Mars = {
+  a: 1.523679,       // AU
+  e: 0.0934,
+  period: 686.980,    // days
 
-    x = x % TWO_PI;
+  // Approximate mean anomaly at J2000
+  M0: 0.524
+};
 
-    if (x < 0)
-        x += TWO_PI;
+// Earth's axial tilt (obliquity of the ecliptic)
+const epsilon = 23.439 * Math.PI / 180;
 
-    return x;
+
+/************************************************************
+ * BASIC UTILITIES
+ ************************************************************/
+
+function degrees(radians) {
+  return radians * 180 / Math.PI;
 }
 
+function radians(degrees) {
+  return degrees * Math.PI / 180;
+}
+
+
+// Put an angle into the interval [0, 2π)
+function normalizeAngle(theta) {
+  theta = theta % (2 * Math.PI);
+
+  if (theta < 0) {
+    theta += 2 * Math.PI;
+  }
+
+  return theta;
+}
+
+
+/************************************************************
+ * TIME
+ ************************************************************/
 
 function daysSinceJ2000(date) {
-
-    return (date - J2000) / (1000 * 60 * 60 * 24);
-
+  return (date - J2000) / (1000 * 60 * 60 * 24);
 }
 
 
-// ---------------------------------------------------------
-// KEPLER'S EQUATION
-// ---------------------------------------------------------
-
-/*
-
-Mean anomaly:
-
-        M = n t + M0
-
-where
-
-        n = 2π / T
-
-Kepler's equation:
-
-        M = E - e sin(E)
-
-We solve this using Newton's method.
-
-*/
-
+/************************************************************
+ * KEPLER'S EQUATION
+ *
+ * M = E - e sin(E)
+ *
+ * We solve this using Newton's method.
+ ************************************************************/
 
 function solveKepler(M, e) {
 
-    M = normalizeAngle(M);
+  // Initial guess
+  let E = M;
 
-    // Initial guess
-    let E = M;
+  for (let i = 0; i < 20; i++) {
 
-    // Newton iteration
-    for (let i = 0; i < 20; i++) {
+    const f = E - e * Math.sin(E) - M;
 
-        let f = E - e * Math.sin(E) - M;
+    const fp = 1 - e * Math.cos(E);
 
-        let fp = 1 - e * Math.cos(E);
+    const correction = f / fp;
 
-        let correction = f / fp;
+    E = E - correction;
 
-        E = E - correction;
-
-        if (Math.abs(correction) < 1e-10)
-            break;
+    // Stop when Newton's method has converged
+    if (Math.abs(correction) < 1e-10) {
+      break;
     }
+  }
 
-    return E;
+  return E;
 }
 
 
-// ---------------------------------------------------------
-// PLANET POSITION
-// ---------------------------------------------------------
+/************************************************************
+ * PLANET POSITION
+ *
+ * In the orbital plane:
+ *
+ * x = a(cos E - e)
+ *
+ * y = a sqrt(1-e²) sin E
+ *
+ ************************************************************/
 
-/*
+function planetPosition(planet, days) {
 
-For an ellipse with the Sun at one focus:
+  // Mean motion
+  const n = 2 * Math.PI / planet.period;
 
-        x = a(cos(E) - e)
+  // Mean anomaly
+  const M = normalizeAngle(planet.M0 + n * days);
 
-        y = a sqrt(1-e²) sin(E)
+  // Solve Kepler's equation
+  const E = solveKepler(M, planet.e);
 
-*/
+  // Position in the orbital plane
+  const x =
+    planet.a * (Math.cos(E) - planet.e);
 
-function planetPosition(planet, date) {
+  const y =
+    planet.a *
+    Math.sqrt(1 - planet.e * planet.e) *
+    Math.sin(E);
 
-    const t = daysSinceJ2000(date);
-
-    const n = TWO_PI / planet.period;
-
-    const M = planet.M0 + n * t;
-
-    const E = solveKepler(M, planet.e);
-
-    const x =
-        planet.a * (Math.cos(E) - planet.e);
-
-    const y =
-        planet.a *
-        Math.sqrt(1 - planet.e * planet.e) *
-        Math.sin(E);
-
-    return {
-        x: x,
-        y: y
-    };
+  return {
+    x: x,
+    y: y
+  };
 }
 
 
-// ---------------------------------------------------------
-// ANGLE CONVERSION
-// ---------------------------------------------------------
+/************************************************************
+ * GEOCENTRIC POSITION OF MARS
+ *
+ * r_Mars/Earth = r_Mars - r_Earth
+ ************************************************************/
 
-function radiansToDegrees(x) {
-    return x * 180 / PI;
+function marsGeocentricPosition(days) {
+
+  const earth = planetPosition(Earth, days);
+
+  const mars = planetPosition(Mars, days);
+
+  return {
+    x: mars.x - earth.x,
+    y: mars.y - earth.y
+  };
 }
 
 
-function degreesToHours(deg) {
-    return deg / 15;
+/************************************************************
+ * CONVERT FROM ECLIPTIC TO EQUATORIAL COORDINATES
+ *
+ * Our 2D model lies in the ecliptic plane:
+ *
+ *          X = x
+ *          Y = y
+ *          Z = 0
+ *
+ * Tilt the coordinate system by Earth's obliquity:
+ *
+ *          X = x
+ *          Y = y cos(ε)
+ *          Z = y sin(ε)
+ *
+ ************************************************************/
+
+function eclipticToEquatorial(x, y) {
+
+  const X = x;
+
+  const Y = y * Math.cos(epsilon);
+
+  const Z = y * Math.sin(epsilon);
+
+  return {
+    X: X,
+    Y: Y,
+    Z: Z
+  };
 }
 
 
-function formatRA(hours) {
+/************************************************************
+ * RIGHT ASCENSION AND DECLINATION
+ ************************************************************/
 
-    hours = (hours + 24) % 24;
+function equatorialCoordinates(X, Y, Z) {
 
-    const h = Math.floor(hours);
+  const distance =
+    Math.sqrt(X*X + Y*Y + Z*Z);
 
-    const minutesDecimal =
-        (hours - h) * 60;
+  // Right ascension
+  let alpha = Math.atan2(Y, X);
 
-    const m = Math.floor(minutesDecimal);
+  alpha = normalizeAngle(alpha);
 
-    const seconds =
-        (minutesDecimal - m) * 60;
+  // Declination
+  const delta =
+    Math.asin(Z / distance);
 
-    return (
-        h + "h " +
-        m + "m " +
-        seconds.toFixed(1) + "s"
-    );
+  return {
+    raRadians: alpha,
+    decRadians: delta,
+    distance: distance
+  };
 }
 
 
-// ---------------------------------------------------------
-// MAIN CALCULATION
-// ---------------------------------------------------------
+/************************************************************
+ * CONVERT RIGHT ASCENSION TO HOURS
+ *
+ * 360 degrees = 24 hours
+ * 15 degrees = 1 hour
+ ************************************************************/
+
+function rightAscensionHours(alpha) {
+
+  return degrees(alpha) / 15;
+}
+
+
+/************************************************************
+ * MAIN CALCULATION
+ ************************************************************/
 
 function calculateMars() {
 
-    const now = new Date();
+  const now = new Date();
 
-    // Heliocentric positions
-    const earth =
-        planetPosition(Earth, now);
+  const days = daysSinceJ2000(now);
 
-    const mars =
-        planetPosition(Mars, now);
+  // Mars relative to Earth
+  const geo = marsGeocentricPosition(days);
 
+  // Tilt the ecliptic plane into the equatorial system
+  const eq =
+    eclipticToEquatorial(geo.x, geo.y);
 
-    // -----------------------------------------------------
-    // GEOCENTRIC POSITION
-    // -----------------------------------------------------
+  // Get RA and Dec
+  const sky =
+    equatorialCoordinates(eq.X, eq.Y, eq.Z);
 
-    // Mars relative to Earth
+  const raHours =
+    rightAscensionHours(sky.raRadians);
 
-    const x =
-        mars.x - earth.x;
-
-    const y =
-        mars.y - earth.y;
-
-
-    // Distance from Earth
-    const distance =
-        Math.sqrt(x*x + y*y);
+  const decDegrees =
+    degrees(sky.decRadians);
 
 
-    // -----------------------------------------------------
-    // GEOCENTRIC LONGITUDE
-    // -----------------------------------------------------
+  /**********************************************************
+   * DISPLAY RESULTS
+   **********************************************************/
 
-    let longitude =
-        Math.atan2(y, x);
+  document.getElementById("output").innerHTML = `
 
-    longitude =
-        normalizeAngle(longitude);
+    <p><strong>Time:</strong> ${now.toUTCString()}</p>
 
+    <p>
+      <strong>Mars geocentric distance:</strong>
+      ${sky.distance.toFixed(4)} AU
+    </p>
 
-    const longitudeDegrees =
-        radiansToDegrees(longitude);
+    <p>
+      <strong>Right Ascension:</strong>
+      ${raHours.toFixed(3)} hours
+    </p>
 
+    <p>
+      <strong>Declination:</strong>
+      ${decDegrees.toFixed(3)}°
+    </p>
 
-    /*
-    In this 2D model we don't yet have a celestial
-    equator, so we simply take:
+    <p>
+      <strong>Ecliptic longitude:</strong>
+      ${degrees(Math.atan2(geo.y, geo.x))
+        .toFixed(3)}°
+    </p>
 
-        declination = 0
+    <hr>
 
-    The longitude is effectively the angular position
-    of Mars relative to the Sun/Earth geometry.
-    */
+    <p>
+      <strong>Model:</strong>
+      2D Keplerian Earth–Mars system
+    </p>
 
-
-    // Convert ecliptic longitude to a pseudo-RA
-    const RA_hours =
-        degreesToHours(longitudeDegrees);
-
-
-    // -----------------------------------------------------
-    // DISPLAY
-    // -----------------------------------------------------
-
-    document.getElementById("result").innerHTML =
-
-        "<strong>Current time:</strong><br>" +
-        now.toUTCString() +
-        "<br><br>" +
-
-        "<strong>Mars</strong><br>" +
-
-        "RA (2D approximation): " +
-        formatRA(RA_hours) +
-        "<br>" +
-
-        "Ecliptic longitude: " +
-        longitudeDegrees.toFixed(3) +
-        "°" +
-        "<br>" +
-
-        "Distance from Earth: " +
-        distance.toFixed(4) +
-        " AU";
+    <p>
+      <strong>Newton iterations:</strong>
+      used to solve Kepler's equation
+    </p>
+  `;
 
 
-    // Draw the Solar System
-    drawOrbit(earth, mars);
+  // Draw the solar system
+  drawSolarSystem(days);
 }
 
 
-// ---------------------------------------------------------
-// DRAW THE SOLAR SYSTEM
-// ---------------------------------------------------------
+/************************************************************
+ * DRAW THE SOLAR SYSTEM
+ ************************************************************/
 
-function drawOrbit(earth, mars) {
+function drawSolarSystem(days) {
 
-    const canvas =
-        document.getElementById("orbitCanvas");
+  const canvas =
+    document.getElementById("sky");
 
-    const ctx =
-        canvas.getContext("2d");
+  const ctx =
+    canvas.getContext("2d");
 
-    ctx.clearRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-    );
-
-
-    const centerX =
-        canvas.width / 2;
-
-    const centerY =
-        canvas.height / 2;
+  ctx.clearRect(
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
 
 
-    // Scale:
-    // Mars orbit is about 1.52 AU
-    const scale = 140;
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+
+  // Scale: AU → pixels
+  const scale = 140;
 
 
-    function screenX(x) {
-        return centerX + scale * x;
-    }
+  /**********************************************************
+   * DRAW ORBITS
+   **********************************************************/
 
-    function screenY(y) {
-        return centerY - scale * y;
-    }
+  ctx.beginPath();
 
+  ctx.arc(
+    cx,
+    cy,
+    Earth.a * scale,
+    0,
+    2 * Math.PI
+  );
 
-    // -----------------------------------------------------
-    // Sun
-    // -----------------------------------------------------
-
-    ctx.beginPath();
-
-    ctx.arc(
-        centerX,
-        centerY,
-        7,
-        0,
-        TWO_PI
-    );
-
-    ctx.fill();
+  ctx.stroke();
 
 
-    // -----------------------------------------------------
-    // Earth orbit
-    // -----------------------------------------------------
+  ctx.beginPath();
 
-    ctx.beginPath();
+  ctx.arc(
+    cx,
+    cy,
+    Mars.a * scale,
+    0,
+    2 * Math.PI
+  );
 
-    for (let theta = 0; theta <= TWO_PI; theta += 0.01) {
-
-        const x =
-            Earth.a * Math.cos(theta);
-
-        const y =
-            Earth.a * Math.sin(theta);
-
-        if (theta === 0)
-            ctx.moveTo(
-                screenX(x),
-                screenY(y)
-            );
-        else
-            ctx.lineTo(
-                screenX(x),
-                screenY(y)
-            );
-    }
-
-    ctx.stroke();
+  ctx.stroke();
 
 
-    // -----------------------------------------------------
-    // Mars orbit
-    // -----------------------------------------------------
+  /**********************************************************
+   * POSITIONS
+   **********************************************************/
 
-    ctx.beginPath();
+  const earth =
+    planetPosition(Earth, days);
 
-    for (let theta = 0; theta <= TWO_PI; theta += 0.01) {
-
-        const x =
-            Mars.a * Math.cos(theta);
-
-        const y =
-            Mars.a * Math.sin(theta);
-
-        if (theta === 0)
-            ctx.moveTo(
-                screenX(x),
-                screenY(y)
-            );
-        else
-            ctx.lineTo(
-                screenX(x),
-                screenY(y)
-            );
-    }
-
-    ctx.stroke();
+  const mars =
+    planetPosition(Mars, days);
 
 
-    // -----------------------------------------------------
-    // Earth
-    // -----------------------------------------------------
+  const ex =
+    cx + earth.x * scale;
 
-    ctx.beginPath();
+  const ey =
+    cy - earth.y * scale;
 
-    ctx.arc(
-        screenX(earth.x),
-        screenY(earth.y),
-        5,
-        0,
-        TWO_PI
-    );
+  const mx =
+    cx + mars.x * scale;
 
-    ctx.fill();
+  const my =
+    cy - mars.y * scale;
 
 
-    // -----------------------------------------------------
-    // Mars
-    // -----------------------------------------------------
+  /**********************************************************
+   * SUN
+   **********************************************************/
 
-    ctx.beginPath();
+  ctx.beginPath();
 
-    ctx.arc(
-        screenX(mars.x),
-        screenY(mars.y),
-        5,
-        0,
-        TWO_PI
-    );
+  ctx.arc(cx, cy, 10, 0, 2 * Math.PI);
 
-    ctx.fill();
+  ctx.fillStyle = "orange";
+
+  ctx.fill();
 
 
-    // -----------------------------------------------------
-    // Labels
-    // -----------------------------------------------------
+  /**********************************************************
+   * EARTH
+   **********************************************************/
 
-    ctx.fillText(
-        "Sun",
-        centerX + 10,
-        centerY
-    );
+  ctx.beginPath();
 
-    ctx.fillText(
-        "Earth",
-        screenX(earth.x) + 8,
-        screenY(earth.y)
-    );
+  ctx.arc(ex, ey, 6, 0, 2 * Math.PI);
 
-    ctx.fillText(
-        "Mars",
-        screenX(mars.x) + 8,
-        screenY(mars.y)
-    );
+  ctx.fillStyle = "blue";
+
+  ctx.fill();
+
+  ctx.fillStyle = "black";
+
+  ctx.fillText("Earth", ex + 10, ey);
+
+
+  /**********************************************************
+   * MARS
+   **********************************************************/
+
+  ctx.beginPath();
+
+  ctx.arc(mx, my, 7, 0, 2 * Math.PI);
+
+  ctx.fillStyle = "red";
+
+  ctx.fill();
+
+  ctx.fillStyle = "black";
+
+  ctx.fillText("Mars", mx + 10, my);
+
+
+  /**********************************************************
+   * GEOCENTRIC LINE
+   **********************************************************/
+
+  ctx.beginPath();
+
+  ctx.moveTo(ex, ey);
+
+  ctx.lineTo(mx, my);
+
+  ctx.stroke();
+
+
+  ctx.fillText(
+    "Sun",
+    cx + 12,
+    cy
+  );
 }
 
 </script>
 
 </body>
 </html>
+
