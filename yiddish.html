@@ -1,533 +1,335 @@
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
-
-<title>Planetary Overhead Calculator</title>
-
-<meta name="viewport"
-      content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JPL Keplerian Planetary Model</title>
 
 <style>
+    body {
+        margin: 0;
+        background: #05070d;
+        color: #eee;
+        font-family: system-ui, sans-serif;
+    }
 
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #05070d;
-    color: #eee;
-}
+    #ui {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        z-index: 10;
+        background: rgba(0,0,0,.78);
+        padding: 18px;
+        border-radius: 10px;
+        width: 360px;
+    }
 
-#controls {
-    padding: 20px;
-    background: #10131c;
-    border-bottom: 1px solid #333;
-}
+    h1 {
+        font-size: 20px;
+        margin-top: 0;
+    }
 
-h1 {
-    margin-top: 0;
-    margin-bottom: 5px;
-}
+    label {
+        display: block;
+        margin-top: 10px;
+        font-size: 13px;
+    }
 
-.subtitle {
-    color: #aaa;
-}
+    input, select, button {
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 4px;
+        padding: 7px;
+        border-radius: 5px;
+        border: 1px solid #555;
+        background: #151922;
+        color: white;
+    }
 
-label {
-    margin-right: 10px;
-}
+    button {
+        cursor: pointer;
+        margin-top: 14px;
+    }
 
-input, select, button {
-    font-size: 16px;
-    padding: 7px;
-    margin: 4px;
-}
+    #info {
+        margin-top: 15px;
+        font-size: 13px;
+        line-height: 1.5;
+    }
 
-button {
-    cursor: pointer;
-}
+    table {
+        border-collapse: collapse;
+        margin-top: 15px;
+        font-size: 12px;
+        width: 100%;
+    }
 
-#main {
-    display: flex;
-    flex-wrap: wrap;
-}
+    th, td {
+        border-bottom: 1px solid #444;
+        padding: 5px;
+        text-align: right;
+    }
 
-#results {
-    width: 430px;
-    min-width: 350px;
-    padding: 20px;
-    box-sizing: border-box;
-    background: #0b0e16;
-}
+    th:first-child,
+    td:first-child {
+        text-align: left;
+    }
 
-#viewer {
-    flex: 1;
-    min-width: 500px;
-    height: 700px;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-}
-
-th, td {
-    text-align: left;
-    padding: 7px;
-    border-bottom: 1px solid #333;
-}
-
-th {
-    color: #aaa;
-}
-
-.planet-name {
-    font-weight: bold;
-}
-
-.big {
-    font-size: 25px;
-    font-weight: bold;
-    margin: 5px 0 20px;
-}
-
-.small {
-    color: #999;
-    font-size: 13px;
-}
-
-#loading {
-    color: #aaa;
-}
-
+    #canvas {
+        width: 100vw;
+        height: 100vh;
+    }
 </style>
-
 </head>
-
 
 <body>
 
+<div id="ui">
 
-<div id="controls">
-
-<h1>Where are the planets overhead?</h1>
-
-<p class="subtitle">
-A three-dimensional Keplerian model of the solar system.
-</p>
+<h1>Planetary Ephemeris</h1>
 
 <label>
-UTC:
-<input id="datetime"
-       type="datetime-local">
+    Date and time (UTC)
+    <input id="datetime" type="datetime-local">
 </label>
-
-<button onclick="calculate()">
-Calculate
-</button>
 
 <label>
-Show:
-<select id="planetSelect"
-        onchange="highlightPlanet()">
-
-<option value="all">All planets</option>
-<option value="Mercury">Mercury</option>
-<option value="Venus">Venus</option>
-<option value="Mars">Mars</option>
-<option value="Jupiter">Jupiter</option>
-<option value="Saturn">Saturn</option>
-<option value="Uranus">Uranus</option>
-<option value="Neptune">Neptune</option>
-
-</select>
+    Display planet
+    <select id="planetSelect">
+        <option value="Mercury">Mercury</option>
+        <option value="Venus">Venus</option>
+        <option value="Mars" selected>Mars</option>
+        <option value="Jupiter">Jupiter</option>
+        <option value="Saturn">Saturn</option>
+        <option value="Uranus">Uranus</option>
+        <option value="Neptune">Neptune</option>
+	<option value="Pluto">Pluto</option>
+    </select>
 </label>
 
+<button onclick="calculate()">Calculate</button>
+
+<div id="info"></div>
+
+<table>
+<thead>
+<tr>
+    <th>Planet</th>
+    <th>RA</th>
+    <th>Dec</th>
+    <th>Lat.</th>
+    <th>Long.</th>
+</tr>
+</thead>
+<tbody id="results"></tbody>
+</table>
+
 </div>
 
+<div id="canvas"></div>
 
-<div id="main">
-
-<div id="results">
-
-<div id="loading">
-Calculating...
-</div>
-
-</div>
-
-
-<div id="viewer"></div>
-
-</div>
-
-
-
-<!-- Three.js -->
-
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js">
-</script>
-
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 
 <script>
 
-/****************************************************************
- *
- * PLANETARY OVERHEAD CALCULATOR
- *
- * Uses JPL approximate Keplerian orbital elements.
- *
- * The calculation is:
- *
- *       orbital elements
- *              ↓
- *       Kepler's equation
- *              ↓
- *       3D heliocentric position
- *              ↓
- *       Mars/Earth relative position
- *              ↓
- *       equatorial coordinates
- *              ↓
- *          RA and Dec
- *              ↓
- *       sidereal time
- *              ↓
- *       overhead latitude / longitude
- *
- ****************************************************************/
+/*
+=========================================================
+JPL APPROXIMATE PLANETARY ELEMENTS
+1800–2050
+=========================================================
+
+For each quantity:
+
+value(T) = value0 + value1*T
+
+where
+
+T = Julian centuries from J2000.0.
+
+Angles are degrees.
+Distances are astronomical units.
+
+These are the JPL Table 1 values.
+*/
+
+const planets = {
+
+Mercury: {
+    a: [0.38709927, 0.00000037],
+    e: [0.20563593, 0.00001906],
+    i: [7.00497902, -0.00594749],
+    L: [252.25032350, 149472.67411175],
+    peri: [77.45779628, 0.16047689],
+    node: [48.33076593, -0.12534081]
+},
+
+Venus: {
+    a: [0.72333566, 0.00000390],
+    e: [0.00677672, -0.00004107],
+    i: [3.39467605, -0.00078890],
+    L: [181.97909950, 58517.81538729],
+    peri: [131.60246718, 0.00268329],
+    node: [76.67984255, -0.27769418]
+},
+
+Earth: {
+    a: [1.00000261, 0.00000562],
+    e: [0.01671123, -0.00004392],
+    i: [-0.00001531, -0.01294668],
+    L: [100.46457166, 35999.37244981],
+    peri: [102.93768193, 0.32327364],
+    node: [0, 0]
+},
+
+Mars: {
+    a: [1.52371034, 0.00001847],
+    e: [0.09339410, 0.00007882],
+    i: [1.84969142, -0.00813131],
+    L: [-4.55343205, 19140.30268499],
+    peri: [-23.94362959, 0.44441088],
+    node: [49.55953891, -0.29257343]
+},
+
+Jupiter: {
+    a: [5.20288700, -0.00011607],
+    e: [0.04838624, -0.00013253],
+    i: [1.30439695, -0.00183714],
+    L: [34.39644051, 3034.74612775],
+    peri: [14.72847983, 0.21252668],
+    node: [100.47390909, 0.20469106]
+},
+
+Saturn: {
+    a: [9.53667594, -0.00125060],
+    e: [0.05386179, -0.00050991],
+    i: [2.48599187, 0.00193609],
+    L: [49.95424423, 1222.49362201],
+    peri: [92.59887831, -0.41897216],
+    node: [113.66242448, -0.28867794]
+},
+
+Uranus: {
+    a: [19.18916464, -0.00196176],
+    e: [0.04725744, -0.00004397],
+    i: [0.77263783, -0.00242939],
+    L: [313.23810451, 428.48202785],
+    peri: [170.95427630, 0.40805281],
+    node: [74.01692503, 0.04240589]
+},
+
+Neptune: {
+    a: [30.06992276, 0.00026291],
+    e: [0.00859048, 0.00005105],
+    i: [1.77004347, 0.00035372],
+    L: [-55.12002969, 218.45945325],
+    peri: [44.96476227, -0.32241464],
+    node: [131.78422574, -0.00508664]
+},
+
+Pluto: {
+    a: [39.48211675, -0.00031596],
+    e: [0.24882730,  0.00005170],
+    i: [17.14001206, 0.00004818],
+    L: [238.92903833, 145.20780515],
+    peri: [224.06891629, -0.04062942],
+    node: [110.30393684, -0.01183482]
+}
+
+};
 
 
-/****************************************************************
- * CONSTANTS
- ****************************************************************/
+/* =====================================================
+   BASIC MATH
+===================================================== */
 
 const DEG = Math.PI / 180;
 
-const AU = 1;
-
-
-/*
- * J2000 Julian Date.
- */
-
-const J2000 = 2451545.0;
-
-
-/*
- * Earth's obliquity at J2000.
- */
-
-const EPSILON = 23.43928 * DEG;
-
-
-
-/****************************************************************
- *
- * PLANETARY ELEMENTS
- *
- * JPL approximate elements.
- *
- * Every parameter is:
- *
- *       value + rate * T
- *
- * where T is Julian centuries since J2000.
- *
- ****************************************************************/
-
-
-const PLANETS = {
-
-
-Mercury: {
-
-    a0: 0.38709927,
-    a1: 0.00000037,
-
-    e0: 0.20563593,
-    e1: 0.00001906,
-
-    i0: 7.00497902,
-    i1: -0.00594749,
-
-    L0: 252.25032350,
-    L1: 149472.67411175,
-
-    peri0: 77.45779628,
-    peri1: 0.16047689,
-
-    node0: 48.33076593,
-    node1: -0.12534081
-},
-
-
-Venus: {
-
-    a0: 0.72333566,
-    a1: 0.00000390,
-
-    e0: 0.00677672,
-    e1: -0.00004107,
-
-    i0: 3.39467605,
-    i1: -0.00078890,
-
-    L0: 181.97909950,
-    L1: 58517.81538729,
-
-    peri0: 131.60246718,
-    peri1: 0.00268329,
-
-    node0: 76.67984255,
-    node1: -0.27769418
-},
-
-
-Earth: {
-
-    a0: 1.00000261,
-    a1: 0.00000562,
-
-    e0: 0.01671123,
-    e1: -0.00004392,
-
-    i0: -0.00001531,
-    i1: -0.01294668,
-
-    L0: 100.46457166,
-    L1: 35999.37244981,
-
-    peri0: 102.93768193,
-    peri1: 0.32327364,
-
-    node0: 0,
-    node1: 0
-},
-
-
-Mars: {
-
-    a0: 1.52371034,
-    a1: 0.00001847,
-
-    e0: 0.09339410,
-    e1: 0.00007882,
-
-    i0: 1.84969142,
-    i1: -0.00813131,
-
-    L0: -4.55343205,
-    L1: 19140.30268499,
-
-    peri0: -23.94362959,
-    peri1: 0.44441088,
-
-    node0: 49.55953891,
-    node1: -0.29257343
-},
-
-
-Jupiter: {
-
-    a0: 5.20288700,
-    a1: -0.00011607,
-
-    e0: 0.04838624,
-    e1: -0.00013253,
-
-    i0: 1.30439695,
-    i1: -0.00183714,
-
-    L0: 34.39644051,
-    L1: 3034.74612775,
-
-    peri0: 14.72847983,
-    peri1: 0.21252668,
-
-    node0: 100.47390909,
-    node1: 0.20469106
-},
-
-
-Saturn: {
-
-    a0: 9.53667594,
-    a1: -0.00125060,
-
-    e0: 0.05386179,
-    e1: -0.00050991,
-
-    i0: 2.48599187,
-    i1: 0.00193609,
-
-    L0: 49.95424423,
-    L1: 1222.49362201,
-
-    peri0: 92.59887831,
-    peri1: -0.41897216,
-
-    node0: 113.66242448,
-    node1: -0.28867794
-},
-
-
-Uranus: {
-
-    a0: 19.18916464,
-    a1: -0.00196176,
-
-    e0: 0.04725744,
-    e1: -0.00004397,
-
-    i0: 0.77263783,
-    i1: -0.00242939,
-
-    L0: 313.23810451,
-    L1: 428.48202785,
-
-    peri0: 170.95427630,
-    peri1: 0.40805281,
-
-    node0: 74.01692503,
-    node1: 0.04240589
-},
-
-
-Neptune: {
-
-    a0: 30.06992276,
-    a1: 0.00026291,
-
-    e0: 0.00859048,
-    e1: 0.00005105,
-
-    i0: 1.77004347,
-    i1: 0.00035372,
-
-    L0: -55.12002969,
-    L1: 218.45945325,
-
-    peri0: 44.96476227,
-    peri1: -0.32241464,
-
-    node0: 131.78422574,
-    node1: -0.00508664
-}
-
-};
-
-
-
-/****************************************************************
- * COLORS
- ****************************************************************/
-
-const PLANET_COLORS = {
-
-    Mercury: 0xaaaaaa,
-    Venus:   0xffcc88,
-    Earth:   0x4488ff,
-    Mars:    0xff5533,
-    Jupiter: 0xddaa77,
-    Saturn:  0xddbb88,
-    Uranus:  0x66ccdd,
-    Neptune: 0x4466ff
-
-};
-
-
-
-/****************************************************************
- * MATH UTILITIES
- ****************************************************************/
-
-
-function rad(x) {
+function degToRad(x) {
     return x * DEG;
 }
 
-
-function deg(x) {
+function radToDeg(x) {
     return x / DEG;
 }
 
-
-function normalizeDegrees(x) {
-
-    x %= 360;
-
-    if (x < 0)
-        x += 360;
-
-    return x;
+function mod360(x) {
+    return ((x % 360) + 360) % 360;
 }
 
 
-function signedDegrees(x) {
-
-    x = normalizeDegrees(x);
-
-    if (x >= 180)
-        x -= 360;
-
-    return x;
-}
-
-
-
-/****************************************************************
- * JULIAN DATE
- ****************************************************************/
-
+/* =====================================================
+   JULIAN DATE
+===================================================== */
 
 function julianDate(date) {
 
-    return date.getTime() / 86400000 + 2440587.5;
+    let year = date.getUTCFullYear();
+    let month = date.getUTCMonth() + 1;
+    let day = date.getUTCDate();
 
+    let hour =
+        date.getUTCHours()
+        + date.getUTCMinutes() / 60
+        + date.getUTCSeconds() / 3600;
+
+    if (month <= 2) {
+        year -= 1;
+        month += 12;
+    }
+
+    const A = Math.floor(year / 100);
+    const B = 2 - A + Math.floor(A / 4);
+
+    return Math.floor(365.25 * (year + 4716))
+         + Math.floor(30.6001 * (month + 1))
+         + day
+         + B
+         - 1524.5
+         + hour / 24;
 }
 
 
+/* =====================================================
+   PLANETARY ELEMENTS
+===================================================== */
 
-/****************************************************************
- * KEPLER EQUATION
- ****************************************************************/
+function elementsAt(name, T) {
 
+    const p = planets[name];
+
+    return {
+        a: p.a[0] + p.a[1] * T,
+        e: p.e[0] + p.e[1] * T,
+        i: p.i[0] + p.i[1] * T,
+        L: p.L[0] + p.L[1] * T,
+        peri: p.peri[0] + p.peri[1] * T,
+        node: p.node[0] + p.node[1] * T
+    };
+}
+
+
+/* =====================================================
+   KEPLER'S EQUATION
+
+   M = E - e sin(E)
+
+   Solve using Newton's method.
+===================================================== */
 
 function solveKepler(M, e) {
 
-    /*
-     * Convert M to radians.
-     */
+    M = M % (2 * Math.PI);
 
-    M = rad(signedDegrees(M));
+    let E = M + e * Math.sin(M);
 
+    for (let k = 0; k < 20; k++) {
 
-    /*
-     * Initial approximation.
-     */
+        const f = E - e * Math.sin(E) - M;
 
-    let E =
-        M + e * Math.sin(M);
+        const fp = 1 - e * Math.cos(E);
 
-
-    /*
-     * Newton's method.
-     */
-
-    for (let n = 0; n < 30; n++) {
-
-        const f =
-            E - e * Math.sin(E) - M;
-
-        const fp =
-            1 - e * Math.cos(E);
-
-        const correction =
-            f / fp;
+        const correction = f / fp;
 
         E -= correction;
 
@@ -535,833 +337,476 @@ function solveKepler(M, e) {
             break;
     }
 
-
     return E;
-
 }
 
 
+/* =====================================================
+   PLANET POSITION IN HELIOCENTRIC ECLIPTIC J2000
 
-/****************************************************************
- * PLANET POSITION
- *
- * Returns J2000 ecliptic Cartesian coordinates in AU.
- ****************************************************************/
+   JPL gives:
 
+       L = mean longitude
+       peri = longitude of perihelion
+       node = longitude of ascending node
+
+   Therefore:
+
+       M = L - peri
+       omega = peri - node
+
+===================================================== */
 
 function planetPosition(name, T) {
 
-    const p = PLANETS[name];
+    const el = elementsAt(name, T);
 
+    const a = el.a;
+    const e = el.e;
 
-    /*
-     * Elements at this date.
-     */
+    const M = degToRad(mod360(el.L - el.peri));
 
-    const a =
-        p.a0 + p.a1*T;
-
-    const e =
-        p.e0 + p.e1*T;
-
-    const inclination =
-        rad(p.i0 + p.i1*T);
-
-    const L =
-        p.L0 + p.L1*T;
-
-    const longitudePerihelion =
-        p.peri0 + p.peri1*T;
-
-    const node =
-        p.node0 + p.node1*T;
-
+    const E = solveKepler(M, e);
 
     /*
-     * Argument of perihelion:
-     *
-     * omega = varpi - Omega
-     */
+       Position in orbital plane.
+    */
 
-    const omega =
-        rad(
-            longitudePerihelion - node
-        );
-
-
-    /*
-     * Mean anomaly:
-     *
-     * M = L - varpi
-     */
-
-    const M =
-        L - longitudePerihelion;
-
-
-    /*
-     * Solve Kepler's equation.
-     */
-
-    const E =
-        solveKepler(M, e);
-
-
-    /*
-     * Coordinates in orbital plane.
-     */
-
-    const xPrime =
+    const xOrb =
         a * (Math.cos(E) - e);
 
-
-    const yPrime =
-        a *
-        Math.sqrt(1 - e*e) *
-        Math.sin(E);
-
+    const yOrb =
+        a * Math.sqrt(1 - e * e) * Math.sin(E);
 
     /*
-     * Longitude of ascending node.
-     */
+       Argument of perihelion.
+    */
 
-    const O =
-        rad(node);
+    const omega =
+        degToRad(el.peri - el.node);
 
+    const Omega =
+        degToRad(el.node);
 
-    const cosO = Math.cos(O);
-    const sinO = Math.sin(O);
+    const inc =
+        degToRad(el.i);
+
+    /*
+       Rotate:
+
+       orbital plane
+          ->
+       ecliptic J2000
+    */
+
+    const cosO = Math.cos(Omega);
+    const sinO = Math.sin(Omega);
 
     const cosw = Math.cos(omega);
     const sinw = Math.sin(omega);
 
-    const cosi = Math.cos(inclination);
-    const sini = Math.sin(inclination);
-
-
-    /*
-     * Rotate orbital plane into ecliptic coordinates.
-     *
-     * This is the full 3D rotation.
-     */
+    const cosi = Math.cos(inc);
+    const sini = Math.sin(inc);
 
     const x =
-
-        (cosO*cosw - sinO*sinw*cosi)
-        * xPrime
-
-        +
-
-        (-cosO*sinw - sinO*cosw*cosi)
-        * yPrime;
-
+        (cosO*cosw - sinO*sinw*cosi) * xOrb
+        + (-cosO*sinw - sinO*cosw*cosi) * yOrb;
 
     const y =
-
-        (sinO*cosw + cosO*sinw*cosi)
-        * xPrime
-
-        +
-
-        (-sinO*sinw + cosO*cosw*cosi)
-        * yPrime;
-
+        (sinO*cosw + cosO*sinw*cosi) * xOrb
+        + (-sinO*sinw + cosO*cosw*cosi) * yOrb;
 
     const z =
+        (sinw*sini) * xOrb
+        + (cosw*sini) * yOrb;
 
-        (sinw*sini)
-        * xPrime
-
-        +
-
-        (cosw*sini)
-        * yPrime;
-
-
-    return {
-        x: x,
-        y: y,
-        z: z
-    };
-
+    return new THREE.Vector3(x, y, z);
 }
 
 
+/* =====================================================
+   ECLIPTIC -> EQUATORIAL
 
-/****************************************************************
- * ECLIPTIC → EQUATORIAL
- ****************************************************************/
+   J2000 obliquity:
+       epsilon = 23.43928 degrees
+===================================================== */
 
+const epsilon = degToRad(23.43928);
 
-function eclipticToEquatorial(r) {
+function eclipticToEquatorial(v) {
 
-    return {
-
-        x: r.x,
-
-        y:
-            Math.cos(EPSILON)*r.y
-            -
-            Math.sin(EPSILON)*r.z,
-
-        z:
-            Math.sin(EPSILON)*r.y
-            +
-            Math.cos(EPSILON)*r.z
-
-    };
-
+    return new THREE.Vector3(
+        v.x,
+        v.y * Math.cos(epsilon) - v.z * Math.sin(epsilon),
+        v.y * Math.sin(epsilon) + v.z * Math.cos(epsilon)
+    );
 }
 
 
+/* =====================================================
+   PRECESSION
 
-/****************************************************************
- * RA / DEC
- ****************************************************************/
+   J2000 -> equator of date
 
+   Standard approximate precession angles.
+===================================================== */
 
-function getRADec(r) {
-
-    const distance =
-        Math.sqrt(
-            r.x*r.x +
-            r.y*r.y +
-            r.z*r.z
-        );
-
-
-    let ra =
-        deg(
-            Math.atan2(r.y, r.x)
-        );
-
-
-    ra =
-        normalizeDegrees(ra);
-
-
-    const dec =
-        deg(
-            Math.asin(
-                r.z / distance
-            )
-        );
-
-
-    return {
-
-        raDegrees: ra,
-
-        raHours: ra / 15,
-
-        decDegrees: dec,
-
-        distance: distance
-    };
-
-}
-
-
-
-/****************************************************************
- * GREENWICH SIDEREAL TIME
- ****************************************************************/
-
-
-function greenwichSiderealTime(JD) {
-
-    const d =
-        JD - J2000;
-
-
-    const T =
-        d / 36525;
-
-
-    let theta =
-
-        280.46061837
-
-        +
-
-        360.98564736629*d
-
-        +
-
-        0.000387933*T*T
-
-        -
-
-        T*T*T / 38710000;
-
-
-    return normalizeDegrees(theta);
-
-}
-
-
-
-/****************************************************************
- * PRECESSION
- *
- * J2000 equatorial coordinates → equinox of date.
- ****************************************************************/
-
-
-function precess(r, T) {
+function precess(v, T) {
 
     const zeta =
-
-        (
-            2306.2181*T
-            +
-            0.30188*T*T
-            +
-            0.017998*T*T*T
-        ) / 3600;
-
-
-    const z =
-
-        (
-            2306.2181*T
-            +
-            1.09468*T*T
-            +
-            0.018203*T*T*T
-        ) / 3600;
-
-
-    const theta =
-
-        (
-            2004.3109*T
-            -
-            0.42665*T*T
-            -
-            0.041833*T*T*T
-        ) / 3600;
-
-
-    /*
-     * First rotation.
-     */
-
-    const x1 =
-
-        Math.cos(rad(zeta))*r.x
-        +
-        Math.sin(rad(zeta))*r.y;
-
-
-    const y1 =
-
-        -Math.sin(rad(zeta))*r.x
-        +
-        Math.cos(rad(zeta))*r.y;
-
-
-    const z1 = r.z;
-
-
-    /*
-     * Second rotation.
-     */
-
-    const x2 =
-
-        Math.cos(rad(theta))*x1
-        -
-        Math.sin(rad(theta))*z1;
-
-
-    const y2 = y1;
-
-
-    const z2 =
-
-        Math.sin(rad(theta))*x1
-        +
-        Math.cos(rad(theta))*z1;
-
-
-    /*
-     * Third rotation.
-     */
-
-    return {
-
-        x:
-            Math.cos(rad(z))*x2
-            +
-            Math.sin(rad(z))*y2,
-
-        y:
-            -Math.sin(rad(z))*x2
-            +
-            Math.cos(rad(z))*y2,
-
-        z:
-            z2
-
-    };
-
-}
-
-
-
-/****************************************************************
- * OVERHEAD POINT
- ****************************************************************/
-
-
-function overheadPoint(raDegrees, decDegrees, GST) {
-
-    /*
-     * Local sidereal time:
-     *
-     *       LST = GST + longitude
-     *
-     *
-     * At the sub-planet point:
-     *
-     *       LST = RA
-     *
-     *
-     * Therefore:
-     *
-     *       longitude = RA - GST.
-     */
-
-    const longitude =
-        signedDegrees(
-            raDegrees - GST
+        degToRad(
+            (2306.2181*T
+            + 0.30188*T*T
+            + 0.017998*T*T*T) / 3600
         );
 
+    const z =
+        degToRad(
+            (2306.2181*T
+            + 1.09468*T*T
+            + 0.018203*T*T*T) / 3600
+        );
 
-    const latitude =
-        decDegrees;
+    const theta =
+        degToRad(
+            (2004.3109*T
+            - 0.42665*T*T
+            - 0.041833*T*T*T) / 3600
+        );
 
+    /*
+       Apply R3(-zeta), R2(theta), R3(-z)
+       to the J2000 vector.
+    */
+
+    let x = v.x;
+    let y = v.y;
+    let zz = v.z;
+
+    let c = Math.cos(zeta);
+    let s = Math.sin(zeta);
+
+    let x1 = c*x + s*y;
+    let y1 = -s*x + c*y;
+
+    let cth = Math.cos(theta);
+    let sth = Math.sin(theta);
+
+    let x2 = cth*x1 - sth*zz;
+    let z2 = sth*x1 + cth*zz;
+
+    c = Math.cos(z);
+    s = Math.sin(z);
+
+    let x3 = c*x2 + s*y1;
+    let y3 = -s*x2 + c*y1;
+
+    return new THREE.Vector3(x3, y3, z2);
+}
+
+
+/* =====================================================
+   RA / DECLINATION
+===================================================== */
+
+function raDec(v) {
+
+    const r = v.length();
+
+    let ra =
+        radToDeg(Math.atan2(v.y, v.x));
+
+    ra = mod360(ra);
+
+    const dec =
+        radToDeg(Math.asin(v.z / r));
 
     return {
-
-        latitude: latitude,
-
-        longitude: longitude
-
+        ra,
+        dec
     };
-
 }
 
 
+/* =====================================================
+   GREENWICH MEAN SIDEREAL TIME
 
-/****************************************************************
- * FORMAT COORDINATES
- ****************************************************************/
+   Approximate formula.
 
+   d = days since J2000.0
+===================================================== */
 
-function formatLatitude(x) {
+function gmst(JD) {
 
-    if (x >= 0)
-        return x.toFixed(3) + "° N";
+    const d = JD - 2451545.0;
 
-    return Math.abs(x).toFixed(3) + "° S";
+    const T = d / 36525;
 
+    let value =
+        280.46061837
+        + 360.98564736629*d
+        + 0.000387933*T*T
+        - T*T*T/38710000;
+
+    return mod360(value);
 }
 
 
-function formatLongitude(x) {
+/* =====================================================
+   OVERHEAD POINT
+===================================================== */
 
-    if (x >= 0)
-        return x.toFixed(3) + "° E";
+function overhead(ra, dec, gst) {
 
-    return Math.abs(x).toFixed(3) + "° W";
+    const latitude = dec;
 
+    /*
+       Longitude positive east.
+    */
+
+    let longitude =
+        mod360(ra - gst);
+
+    if (longitude > 180)
+        longitude -= 360;
+
+    return {
+        latitude,
+        longitude
+    };
 }
 
 
-function formatRA(hours) {
-
-    const h =
-        Math.floor(hours);
-
-
-    const minutesDecimal =
-        (hours - h) * 60;
-
-
-    const m =
-        Math.floor(minutesDecimal);
-
-
-    const s =
-        (minutesDecimal - m) * 60;
-
-
-    return `${h}h ${m}m ${s.toFixed(1)}s`;
-
-}
-
-
-
-/****************************************************************
- * CALCULATE ALL PLANETS
- ****************************************************************/
-
+/* =====================================================
+   MAIN CALCULATION
+===================================================== */
 
 function calculate() {
 
     const input =
         document.getElementById("datetime").value;
 
-
-    if (!input) {
-
-        alert("Please select a date and time.");
-
+    if (!input)
         return;
-    }
-
 
     /*
-     * Interpret the entered time as UTC.
-     */
+       datetime-local has no timezone.
+
+       We interpret the entered time as UTC.
+    */
 
     const date =
         new Date(input + ":00Z");
 
-
     const JD =
         julianDate(date);
 
-
     const T =
-        (JD - J2000) / 36525;
-
-
-    const GST =
-        greenwichSiderealTime(JD);
-
-
-    const earth =
-        planetPosition("Earth", T);
-
-
-    const results = [];
-
+        (JD - 2451545.0) / 36525;
 
     /*
-     * Calculate every planet.
-     */
+       Calculate Earth position.
+    */
 
-    for (const name of Object.keys(PLANETS)) {
+    const earthEcl =
+        planetPosition("Earth", T);
 
-        if (name === "Earth")
-            continue;
+    const rows = [];
 
+    const planetNames = [
+        "Mercury",
+        "Venus",
+        "Mars",
+        "Jupiter",
+        "Saturn",
+        "Uranus",
+        "Neptune",
+	"Pluto"
 
-        const heliocentric =
+    ];
+
+    for (const name of planetNames) {
+
+        /*
+           Heliocentric planet position.
+        */
+
+        const planetEcl =
             planetPosition(name, T);
 
+        /*
+           Geocentric vector:
+               planet - Earth
+        */
+
+        const geoEcl =
+            planetEcl.clone().sub(earthEcl);
 
         /*
-         * Planet as seen from Earth's center.
-         */
+           Convert to equatorial coordinates.
+        */
 
-        const geocentric = {
-
-            x:
-                heliocentric.x
-                -
-                earth.x,
-
-            y:
-                heliocentric.y
-                -
-                earth.y,
-
-            z:
-                heliocentric.z
-                -
-                earth.z
-
-        };
-
+        const geoEqJ2000 =
+            eclipticToEquatorial(geoEcl);
 
         /*
-         * Ecliptic → equatorial.
-         */
+           Precess to equator of date.
+        */
 
-        const equatorial =
-            eclipticToEquatorial(
-                geocentric
+        const geoEqDate =
+            precess(geoEqJ2000, T);
+
+        /*
+           RA and declination.
+        */
+
+        const rd =
+            raDec(geoEqDate);
+
+        /*
+           Greenwich sidereal time.
+        */
+
+        const gst =
+            gmst(JD);
+
+        /*
+           Point on Earth directly underneath.
+        */
+
+        const ground =
+            overhead(
+                rd.ra,
+                rd.dec,
+                gst
             );
 
-
-        /*
-         * Precess to equinox of date.
-         */
-
-        const apparent =
-            precess(
-                equatorial,
-                T
-            );
-
-
-        /*
-         * RA / Dec.
-         */
-
-        const coords =
-            getRADec(
-                apparent
-            );
-
-
-        /*
-         * Overhead point.
-         */
-
-        const overhead =
-            overheadPoint(
-                coords.raDegrees,
-                coords.decDegrees,
-                GST
-            );
-
-
-        results.push({
-
-            name: name,
-
-            ra: coords.raHours,
-
-            dec: coords.decDegrees,
-
-            distance: coords.distance,
-
-            latitude: overhead.latitude,
-
-            longitude: overhead.longitude
-
+        rows.push({
+            name,
+            ra: rd.ra,
+            dec: rd.dec,
+            lat: ground.latitude,
+            lon: ground.longitude
         });
-
     }
 
+    /*
+       Fill table.
+    */
 
-    displayResults(
-        date,
-        GST,
-        results
-    );
+    let html = "";
 
-
-    update3D(
-        T
-    );
-
-}
-
-
-
-/****************************************************************
- * DISPLAY TABLE
- ****************************************************************/
-
-
-function displayResults(date, GST, results) {
-
-    let html = `
-
-    <h2>Planetary positions</h2>
-
-    <p>
-        <strong>${date.toUTCString()}</strong>
-    </p>
-
-    <p class="small">
-        Greenwich sidereal time:
-        ${(GST/15).toFixed(4)} h
-    </p>
-
-    <table>
-
-    <tr>
-        <th>Planet</th>
-        <th>RA</th>
-        <th>Dec</th>
-        <th>Overhead</th>
-    </tr>
-    `;
-
-
-    for (const r of results) {
+    for (const r of rows) {
 
         html += `
-
         <tr>
-
-        <td class="planet-name">
-            ${r.name}
-        </td>
-
-        <td>
-            ${formatRA(r.ra)}
-        </td>
-
-        <td>
-            ${r.dec.toFixed(3)}°
-        </td>
-
-        <td>
-            ${formatLatitude(r.latitude)}
-            <br>
-            ${formatLongitude(r.longitude)}
-        </td>
-
+            <td>${r.name}</td>
+            <td>${formatRA(r.ra)}</td>
+            <td>${r.dec.toFixed(2)}°</td>
+            <td>${r.lat.toFixed(2)}°</td>
+            <td>${r.lon.toFixed(2)}°</td>
         </tr>
-
         `;
     }
 
+    document.getElementById("results").innerHTML = html;
 
-    html += `
+    const selected =
+        document.getElementById("planetSelect").value;
 
-    </table>
+    const r =
+        rows.find(x => x.name === selected);
 
-    <hr>
+    document.getElementById("info").innerHTML = `
+        <b>${selected}</b><br>
+        Julian Date: ${JD.toFixed(5)}<br>
+        Julian centuries from J2000:
+        ${T.toFixed(8)}<br><br>
 
-    <p class="small">
+        Right Ascension:
+        ${formatRA(r.ra)}<br>
 
-    <strong>Mathematics:</strong><br>
+        Declination:
+        ${r.dec.toFixed(4)}°<br>
 
-    Kepler's equation is solved by Newton's method.
-    The resulting orbital-plane coordinates are rotated
-    using the orbital inclination and longitude of the
-    ascending node. The geocentric vector is then rotated
-    from ecliptic to equatorial coordinates.
+        Overhead latitude:
+        ${r.lat.toFixed(4)}°<br>
 
-    </p>
-
-    <p class="small">
-
-    At the point where a planet is directly overhead,
-
-    latitude = declination
-
-    and
-
-    longitude = RA − Greenwich sidereal time.
-
-    </p>
-
+        Overhead longitude:
+        ${r.lon.toFixed(4)}°
     `;
 
-
-    document.getElementById("results").innerHTML =
-        html;
-
+    updatePlanet(r.name, T);
 }
 
 
+/* =====================================================
+   FORMAT RA
+===================================================== */
 
-/****************************************************************
- *
- * THREE.JS 3D SOLAR SYSTEM
- *
- ****************************************************************/
+function formatRA(degrees) {
+
+    const hours = degrees / 15;
+
+    const h = Math.floor(hours);
+
+    const minutes =
+        Math.floor((hours - h) * 60);
+
+    const seconds =
+        ((hours - h) * 60 - minutes) * 60;
+
+    return `${h}h ${minutes}m ${seconds.toFixed(1)}s`;
+}
 
 
-let scene;
-let camera;
-let renderer;
+/* =====================================================
+   THREE.JS VISUALIZATION
+===================================================== */
+
+let scene, camera, renderer;
 let planetMeshes = {};
-let orbitMeshes = {};
+let earthMesh;
+let selectedMesh;
 
-
-
-function initialize3D() {
-
-    const container =
-        document.getElementById("viewer");
-
+function initScene() {
 
     scene =
         new THREE.Scene();
 
-
-    /*
-     * Camera.
-     */
-
     camera =
         new THREE.PerspectiveCamera(
-            50,
-            container.clientWidth /
-            container.clientHeight,
-            0.1,
+            45,
+            window.innerWidth / window.innerHeight,
+            0.01,
             1000
         );
 
-
-    camera.position.set(
-        0,
-        18,
-        25
-    );
-
-
-    camera.lookAt(
-        0,
-        0,
-        0
-    );
-
-
-    /*
-     * Renderer.
-     */
+    camera.position.set(0, 12, 22);
 
     renderer =
         new THREE.WebGLRenderer({
             antialias: true
         });
 
-
-    renderer.setPixelRatio(
-        window.devicePixelRatio
-    );
-
-
     renderer.setSize(
-        container.clientWidth,
-        container.clientHeight
+        window.innerWidth,
+        window.innerHeight
     );
 
-
-    container.appendChild(
-        renderer.domElement
-    );
-
+    document
+        .getElementById("canvas")
+        .appendChild(renderer.domElement);
 
     /*
-     * Sun.
-     */
+       Sun.
+    */
 
     const sunGeometry =
-        new THREE.SphereGeometry(
-            0.5,
-            32,
-            32
-        );
-
+        new THREE.SphereGeometry(.35, 32, 32);
 
     const sunMaterial =
-        new THREE.MeshBasicMaterial({
-            color: 0xffaa00
-        });
-
+        new THREE.MeshBasicMaterial();
 
     const sun =
         new THREE.Mesh(
@@ -1369,34 +814,59 @@ function initialize3D() {
             sunMaterial
         );
 
-
     scene.add(sun);
 
+    /*
+       Earth.
+    */
+
+    const earthGeometry =
+        new THREE.SphereGeometry(.18, 24, 24);
+
+    const earthMaterial =
+        new THREE.MeshBasicMaterial();
+
+    earthMesh =
+        new THREE.Mesh(
+            earthGeometry,
+            earthMaterial
+        );
+
+    scene.add(earthMesh);
 
     /*
-     * Planets and orbits.
-     */
+       Planets.
+    */
 
-    for (const name of Object.keys(PLANETS)) {
+    const names = [
+        "Mercury",
+        "Venus",
+        "Mars",
+        "Jupiter",
+        "Saturn",
+        "Uranus",
+        "Neptune",
+	"Pluto"
+    ];
 
-        if (name === "Earth")
-            continue;
+    for (const name of names) {
 
+        const radius =
+            name === "Jupiter" ? .30 :
+            name === "Saturn" ? .26 :
+            name === "Uranus" ? .22 :
+            name === "Neptune" ? .22 :
+            .12;
 
         const geometry =
             new THREE.SphereGeometry(
-                0.12,
-                20,
-                20
+                radius,
+                24,
+                24
             );
 
-
         const material =
-            new THREE.MeshBasicMaterial({
-                color:
-                    PLANET_COLORS[name]
-            });
-
+            new THREE.MeshBasicMaterial();
 
         const mesh =
             new THREE.Mesh(
@@ -1404,443 +874,131 @@ function initialize3D() {
                 material
             );
 
-
         scene.add(mesh);
 
-        planetMeshes[name] =
-            mesh;
-
-
-        /*
-         * Orbit.
-         */
-
-        createOrbit(name);
-
+        planetMeshes[name] = mesh;
     }
 
-
-    /*
-     * Earth.
-     */
-
-    const earthGeometry =
-        new THREE.SphereGeometry(
-            0.14,
-            20,
-            20
-        );
-
-
-    const earthMaterial =
-        new THREE.MeshBasicMaterial({
-            color: PLANET_COLORS.Earth
-        });
-
-
-    const earthMesh =
-        new THREE.Mesh(
-            earthGeometry,
-            earthMaterial
-        );
-
-
-    scene.add(
-        earthMesh
-    );
-
-
-    planetMeshes.Earth =
-        earthMesh;
-
-
-    /*
-     * Resize.
-     */
-
-    window.addEventListener(
-        "resize",
-        resize3D
-    );
-
-
-    /*
-     * Animation.
-     */
-
-    animate3D();
-
+    animate();
 }
 
 
+/* =====================================================
+   UPDATE 3D POSITIONS
+===================================================== */
 
-/****************************************************************
- * CREATE ORBIT
- ****************************************************************/
+function updatePlanet(name, T) {
 
+    const earth =
+        planetPosition("Earth", T);
 
-function createOrbit(name) {
+    earthMesh.position.set(
+        earth.x,
+        earth.z,
+        -earth.y
+    );
 
-    const points = [];
-
-
-    /*
-     * We draw the orbit by varying eccentric anomaly.
-     */
-
-    for (let j = 0; j <= 200; j++) {
-
-        const E =
-            2*Math.PI*j/200;
-
-
-        /*
-         * Use J2000 elements for the shape.
-         */
-
-        const p =
-            PLANETS[name];
-
-
-        const a =
-            p.a0;
-
-
-        const e =
-            p.e0;
-
-
-        const i =
-            rad(p.i0);
-
-
-        const omega =
-            rad(
-                p.peri0 -
-                p.node0
-            );
-
-
-        const O =
-            rad(p.node0);
-
-
-        const xPrime =
-            a *
-            (Math.cos(E) - e);
-
-
-        const yPrime =
-            a *
-            Math.sqrt(1-e*e) *
-            Math.sin(E);
-
-
-        const cosO =
-            Math.cos(O);
-
-        const sinO =
-            Math.sin(O);
-
-        const cosw =
-            Math.cos(omega);
-
-        const sinw =
-            Math.sin(omega);
-
-        const cosi =
-            Math.cos(i);
-
-        const sini =
-            Math.sin(i);
-
-
-        const x =
-
-            (cosO*cosw -
-             sinO*sinw*cosi)
-             * xPrime
-
-            +
-
-            (-cosO*sinw -
-             sinO*cosw*cosi)
-             * yPrime;
-
-
-        const y =
-
-            (sinO*cosw +
-             cosO*sinw*cosi)
-             * xPrime
-
-            +
-
-            (-sinO*sinw +
-             cosO*cosw*cosi)
-             * yPrime;
-
-
-        const z =
-
-            sinw*sini*xPrime
-            +
-            cosw*sini*yPrime;
-
-
-        /*
-         * Scale the solar system.
-         */
-
-        points.push(
-            new THREE.Vector3(
-                x,
-                z,
-                -y
-            )
-        );
-
-    }
-
-
-    const geometry =
-        new THREE.BufferGeometry()
-            .setFromPoints(points);
-
-
-    const material =
-        new THREE.LineBasicMaterial({
-            color:
-                PLANET_COLORS[name],
-            transparent: true,
-            opacity: 0.35
-        });
-
-
-    const orbit =
-        new THREE.Line(
-            geometry,
-            material
-        );
-
-
-    scene.add(orbit);
-
-    orbitMeshes[name] =
-        orbit;
-
-}
-
-
-
-/****************************************************************
- * UPDATE 3D POSITIONS
- ****************************************************************/
-
-
-function update3D(T) {
-
-    for (const name of Object.keys(PLANETS)) {
+    for (const planetName in planetMeshes) {
 
         const p =
             planetPosition(
-                name,
+                planetName,
                 T
             );
 
-
         const mesh =
-            planetMeshes[name];
-
-
-        if (!mesh)
-            continue;
-
+            planetMeshes[planetName];
 
         /*
-         * Three.js uses:
-         *
-         * x = ecliptic X
-         * y = ecliptic Z
-         * z = -ecliptic Y
-         *
-         * This gives a convenient visual orientation.
-         */
+           Re-orient axes for the display.
+        */
 
         mesh.position.set(
             p.x,
             p.z,
             -p.y
         );
-
     }
-
-}
-
-
-
-/****************************************************************
- * HIGHLIGHT PLANET
- ****************************************************************/
-
-
-function highlightPlanet() {
-
-    const selected =
-        document.getElementById(
-            "planetSelect"
-        ).value;
-
-
-    for (const name of Object.keys(planetMeshes)) {
-
-        const mesh =
-            planetMeshes[name];
-
-
-        if (selected === "all") {
-
-            mesh.scale.set(
-                1,1,1
-            );
-
-        } else if (name === selected) {
-
-            mesh.scale.set(
-                2.5,2.5,2.5
-            );
-
-        } else {
-
-            mesh.scale.set(
-                1,1,1
-            );
-
-        }
-
-    }
-
-}
-
-
-
-/****************************************************************
- * ANIMATION
- ****************************************************************/
-
-
-function animate3D() {
-
-    requestAnimationFrame(
-        animate3D
-    );
-
 
     /*
-     * Slowly rotate the entire scene.
-     */
+       Highlight selected planet by scaling.
+    */
 
-    scene.rotation.y += 0.001;
+    for (const planetName in planetMeshes) {
+        planetMeshes[planetName].scale.set(
+            1,1,1
+        );
+    }
 
+    if (planetMeshes[name]) {
+
+        planetMeshes[name].scale.set(
+            1.7,1.7,1.7
+        );
+    }
+}
+
+
+/* =====================================================
+   ANIMATION
+===================================================== */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    scene.rotation.y += 0.0005;
 
     renderer.render(
         scene,
         camera
     );
-
 }
 
 
+window.addEventListener(
+    "resize",
+    () => {
 
-/****************************************************************
- * RESIZE
- ****************************************************************/
+        camera.aspect =
+            window.innerWidth /
+            window.innerHeight;
 
+        camera.updateProjectionMatrix();
 
-function resize3D() {
-
-    const container =
-        document.getElementById("viewer");
-
-
-    camera.aspect =
-        container.clientWidth /
-        container.clientHeight;
-
-
-    camera.updateProjectionMatrix();
+        renderer.setSize(
+            window.innerWidth,
+            window.innerHeight
+        );
+    }
+);
 
 
-    renderer.setSize(
-        container.clientWidth,
-        container.clientHeight
-    );
+/* =====================================================
+   INITIALIZE
+===================================================== */
 
-}
+initScene();
 
+const now =
+    new Date();
 
+const iso =
+    new Date(
+        now.getTime()
+        - now.getTimezoneOffset()*60000
+    )
+    .toISOString()
+    .slice(0,16);
 
-/****************************************************************
- * DEFAULT TIME
- ****************************************************************/
-
-
-function setDefaultTime() {
-
-    const now =
-        new Date();
-
-
-    const year =
-        now.getUTCFullYear();
-
-
-    const month =
-        String(
-            now.getUTCMonth()+1
-        ).padStart(2,"0");
-
-
-    const day =
-        String(
-            now.getUTCDate()
-        ).padStart(2,"0");
-
-
-    const hour =
-        String(
-            now.getUTCHours()
-        ).padStart(2,"0");
-
-
-    const minute =
-        String(
-            now.getUTCMinutes()
-        ).padStart(2,"0");
-
-
-    document.getElementById(
-        "datetime"
-    ).value =
-        `${year}-${month}-${day}T${hour}:${minute}`;
-
-}
-
-
-
-/****************************************************************
- * START
- ****************************************************************/
-
-
-initialize3D();
-
-setDefaultTime();
+document.getElementById(
+    "datetime"
+).value = iso;
 
 calculate();
 
 </script>
 
 </body>
-
 </html>
+
