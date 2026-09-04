@@ -642,26 +642,11 @@ function calculate() {
         const geoEcl =
             planetEcl.clone().sub(earthEcl);
 
-        /*
-           Convert to equatorial coordinates.
-        */
-
         const geoEqJ2000 =
-            eclipticToEquatorial(geoEcl);
+    eclipticToEquatorial(geoEcl);
 
-        /*
-           Precess to equator of date.
-        */
-
-        const geoEqDate =
-            precess(geoEqJ2000, T);
-
-        /*
-           RA and declination.
-        */
-
-        const rd =
-            raDec(geoEqDate);
+const rd =
+    raDec(geoEqJ2000);
 
         /*
            Greenwich sidereal time.
